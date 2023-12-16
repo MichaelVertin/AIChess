@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.TerrainUtils;
@@ -40,12 +41,22 @@ public class Coor
     {
         return "(" + x + "," + y + ")";
     }
+
+    // elementwise addition
+    public static Coor operator+(Coor left, Coor right)
+    {
+        return new Coor( left.x + right.x, left.y + right.y );
+    }
+
+    // scalar multiplication
+    public static Coor operator*(Coor left, int right)
+    {
+        return new Coor(left.x * right, left.y * right );
+    }
 }
 
 public class Board : MonoBehaviour
 {
-    public GameObject PIECE_PREFAB;
-
     // pieces on or off the board
     private List<Piece> _pieces = new List<Piece>();
 
@@ -89,7 +100,7 @@ public class Board : MonoBehaviour
     }
     
     
-    void Awake()
+    void Start()
     {
         // initialize players
         for( int playerID = 0; playerID < GAME_SETTINGS.NUM_PLAYERS; playerID++ )
@@ -108,17 +119,14 @@ public class Board : MonoBehaviour
 
 
         // initialize pieces
-        Piece piece01 = CreatePiece(new Coor(0, 0), players[0], PIECE_PREFAB);
-        AddPiece(piece01);
-
-        Piece piece02 = CreatePiece(new Coor(1, 1), players[1], PIECE_PREFAB);
-        AddPiece(piece02);
-
-        Piece piece03 = CreatePiece(new Coor(6, 6), players[0], PIECE_PREFAB);
-        AddPiece(piece03);
-
-        Piece piece04 = CreatePiece(new Coor(7, 7), players[1], PIECE_PREFAB);
-        AddPiece(piece04);
+        AddPiece(CreateBishop(new Coor(0, 0), players[0]));
+        AddPiece(CreateBasic(new Coor(1, 1), players[1]));
+        AddPiece(CreateBasic(new Coor(6, 6), players[0]));
+        AddPiece(CreateBishop(new Coor(7, 7), players[1]));
+        AddPiece(CreateBishop(new Coor(2, 0), players[0]));
+        AddPiece(CreateBishop(new Coor(0, 2), players[1]));
+        AddPiece(CreateBishop(new Coor(4, 4), players[0]));
+        AddPiece(CreateBishop(new Coor(5, 5), players[1]));
 
         // set player values
         playerTurn = players[0];
@@ -254,11 +262,11 @@ public class Board : MonoBehaviour
         playerTurn = players[playerID];
     }
 
-    // instantiate newPiecePrefab at newPieceCoor under owner's control
-    public Piece CreatePiece( Coor newPieceCoor, Player owner, GameObject newPiecePrefab )
+
+    // create object at newPieceCoor under owner's control
+    private Piece CreatePiece( Coor newPieceCoor, Player owner, Piece piece )
     {
         // create an instance of the newPiecePrefab, then initialize
-        Piece piece = Instantiate<GameObject>(newPiecePrefab).GetComponent<Piece>();
         piece.Init(this, newPieceCoor, players[owner.id]);
 
         // add to the list of pieces, start inactive
@@ -268,12 +276,29 @@ public class Board : MonoBehaviour
         return piece;
     }
 
+    public Piece CreateBishop( Coor newPieceCoor, Player owner )
+    {
+        Piece piece = new Bishop();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
+    public Piece CreatePawn(Coor newPieceCoor, Player owner)
+    {
+        Piece piece = new Pawn();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
+    public Piece CreateBasic(Coor newPieceCoor, Player owner)
+    {
+        Piece piece = new Basic();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
     // destroy the specified the piece
     public void DestroyPiece( Piece piece )
     {
         GetPosition(piece.coor).piece = null;
         _pieces.Remove(piece);
-        Destroy(piece.gameObject);
     }
 
     // add the specified piece to the board
