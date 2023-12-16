@@ -16,12 +16,18 @@ Board:Monobehaviour
     playerTurn:PlayerID
     playerInControl:PlayerID
     state:BOARD_STATE
-    IsFriend(Coor):bool
-    IsEnemy(Coor):bool
-    IsPiece(Coor):bool
-    IsPosition(Coor):bool
+    GetFriend(Coor):bool
+    GetEnemy(Coor):bool
+    GetPiece(Coor):bool
+    IsEmpty(Coor):bool
     UpdatePhysical():void
     PassControl(Player):void
+    Next/PrevPlayerTurn():void
+    CreatePiece(Coor,Player,GameObject)
+    DestroyPiece(Piece):void
+    AddPiece(Piece):void
+    RemovePiece(Piece):void
+    
 
 Piece:Monobehaviour
     board:Board
@@ -42,22 +48,24 @@ Turn
     Undo():void
     Verify():bool
     DoIfVerified():bool
+    RemovePiece(Piece):void
+    AddPiece(Piece):void
 
 Position
     piece:Piece
 
 Player:
     id:PlayerID
-    OnTurnStart():void
+    OnControlStart():void
 
 
 
 
 ///////////////// processing //////////////////
 Board:
-    IsFriend/IsEnemy/IsPiece:
-        determines whether the coordinate contains a 
-        friend piece, enemey piece, piece, or in the range
+    GetFriend/GetEnemy/GetPiece:
+        returns the specified item at the coordinate, 
+        if not exists, returns null
         (friend/enemy is determined by playerTurn)
     playerInControl:
         returns which player is in control of the pieces
@@ -68,6 +76,16 @@ Board:
     PassControl():
         starts next players turn, 
         updates player in control
+    Next/PrevPlayerTurn():
+        change the player turn
+    CreatePiece():
+        create a piece (not placed on the board yet)
+    DestroyPiece():
+        destroys a piece (does not remove from board)
+    AddPiece():
+        add a piece to the board
+    RemovePiece():
+        removes a piece from the board
 
 Piece:
     isActive:
@@ -111,9 +129,14 @@ Turn:
         if the state of the board is invalid, 
             undoes the turn, report failure
         otherwise, report success
+    RemovePiece():
+        makrs a piece to be removed during the turn
+    AddPiece():
+        marks a piece to be added during the turn
+
 
 Player:
-    OnTurnStart():
+    OnControlStart():
         default moves a random piece
 
 
@@ -121,31 +144,35 @@ Player:
 //////////////////// access //////////////////
    attribute         |    who will modify/call
 ================================================
-Board.pieces         | Turn
-Board.positions      | Player
+Board.pieces         | 
 Board.history        | Turn
 Board.players        | 
-Board.playerTurn     | Turn
+Board.nextPlayerTurn | 
 Board.state          | 
 Board.playerInControl| 
 Piece.coor           | Turn
-Piece.isActive       | Turn
+Piece.isActive       | Board
 Piece.owner          | 
 Turn.start/endPos    | 
 Turn.pieceRemoved    | 
 Position.piece       | Turn, Board
 
-Board.IsFriend       | Turn
-Board.UpdatePhysical | Player
+Board.GetPosition    | Piece,Turn
+Board.GetFriend      | Piece
+Board.UpdatePhysical | 
 Board.PassControl    | Player
-Piece.GetTurns       | Turn
-Piece.GetLegalTurns  | Player, Turn
+Board.NextPlayerTurn | Turn
+Board.CreatePiece    | Piece
+Board.AddPiece       | Turn
+Piece.GetTurns       | Player
+Piece.GetLegalTurns  | Player
 Piece.UpdatePhysical | Board
-Turn.Do              | Player
+Turn.Do              | 
 Turn.Undo            | Player
 Turn.Verify          | Player
 Turn.DoIfVerified    | Player
-Player.OnTurnStart   | Board
+Player.OnControlStart| Board
+
 
 
 ///////////////// rules of flow ///////////////////
@@ -161,8 +188,6 @@ Board.playerInControl
     - true before and after any Player method
 
 All other attributes must be updated before any method call. 
-
-
 
 
 
