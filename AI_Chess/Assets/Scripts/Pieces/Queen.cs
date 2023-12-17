@@ -12,7 +12,7 @@ public class Queen : Piece
             return StaticPrefabs.QUEEN_PREFAB[owner.id];
         }
     }
-    public override List<Turn> GetTurns()
+    public override List<Turn> GetPieceTurns()
     {
         List<Coor> directions = new List<Coor>
         {
