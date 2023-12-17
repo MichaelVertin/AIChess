@@ -14,7 +14,7 @@ public class King : Piece
     }
 
 
-    public override List<Turn> GetTurns()
+    public override List<Turn> GetPieceTurns()
     {
         // 1 in any direction
         List<Coor> moves = new List<Coor>
@@ -33,12 +33,8 @@ public class King : Piece
         List<Turn> turns = new List<Turn>();
         foreach (Coor move in moves)
         {
-            Turn turn = GetTurnByPosition(this.coor, this.coor + move,
-                                          ON_CONTACT_ENEMY.REMOVE_ENEMY);
-            if (turn != null)
-            {
-                turns.Add(turn);
-            }
+            AddTurnByPosition(turns, this.coor, this.coor + move,
+                                     ON_CONTACT_ENEMY.REMOVE_ENEMY);
         }
 
         return turns;

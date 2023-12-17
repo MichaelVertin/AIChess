@@ -1,14 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Player
 {
     public int id;
+    public Coor direction;
+
     public Player( int id )
     {
         this.id = id;
+
+        // first player moves forward
+        if( id == 0 )
+        {
+            direction = new Coor(0, 1);
+        }
+        // other players move backward
+        else
+        {
+            direction = new Coor(0, -1);
+        }
     }
 
     // called when given control of the Board

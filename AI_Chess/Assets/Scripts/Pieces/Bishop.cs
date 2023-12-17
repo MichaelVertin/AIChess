@@ -15,7 +15,7 @@ public class Bishop : Piece
         }
     }
 
-    public override List<Turn> GetTurns()
+    public override List<Turn> GetPieceTurns()
     {
         List<Coor> directions = new List<Coor>
         {

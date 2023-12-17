@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum ON_CONTACT_ENEMY
@@ -31,19 +32,23 @@ public abstract class Piece
     }
 
     // return turns that involve this
-    public abstract List<Turn> GetTurns();
-
-    // return legal turns that involve this
-    public List<Turn> GetLegalTurns()
+    public List<Turn> GetTurns()
     {
         // fail if not active or not owner's turn
-        // TODO (before implementing check):
-        //     this block needs to be added to GetTurns
         if (!isActive || !ReferenceEquals(board.playerTurn, owner))
         {
             return new List<Turn>();
         }
 
+        return GetPieceTurns();
+    }
+
+    public abstract List<Turn> GetPieceTurns();
+
+    // return legal turns that involve this
+    public List<Turn> GetLegalTurns()
+    {
+        // TODO: implement check rules here
         // return all available turns
         return GetTurns();
     }
@@ -94,22 +99,15 @@ public abstract class Piece
         // start on first step
         Coor testCoor = start + stepSize;
 
-        // iterate until non-empty position
-        while (board.IsEmpty(testCoor))
+        // create a turn on each non-enemy position as long as availble
+        while (AddTurnByPosition(turns, start, testCoor, ON_CONTACT_ENEMY.EXCLUDE))
         {
-            // add the coordinate to the moves
-            turns.Add(new Turn(board, start, testCoor, this));
-
             testCoor = testCoor + stepSize;
         }
 
-        // get turn based on the movement for the piece
+        // create a turn for the blocking coordinate based on enemyCode
         Coor blockingCoor = testCoor;
-        Turn turnOnBlockage = GetTurnByPosition(start, blockingCoor, contactEnemyCode);
-        if( turnOnBlockage != null )
-        {
-            turns.Add(turnOnBlockage);
-        }
+        AddTurnByPosition(turns, start, blockingCoor, contactEnemyCode);
 
         return turns;
     }
@@ -120,23 +118,23 @@ public abstract class Piece
         List<Turn> turns = new List<Turn>();
         foreach (Coor direction in directions)
         {
-            turns.AddRange(GetTurnsByLinearMovement(
-                               this.coor, direction,
-                               contactEnemyCode));
+            turns.AddRange(GetTurnsByLinearMovement( this.coor, direction,
+                                                     contactEnemyCode));
         }
         return turns;
     }
     
-    protected Turn GetTurnByPosition(Coor start, Coor end, 
+    protected bool AddTurnByPosition(List<Turn> turns, Coor start, Coor end, 
                    ON_CONTACT_ENEMY contactEnemyCode = ON_CONTACT_ENEMY.EXCLUDE)
     {
         // move to the position if empty
         if( board.IsEmpty(end) )
         {
-            return new Turn(board, start, end, this);
+            turns.Add(new Turn(board, start, end, this));
+            return true;
         }
 
-        // if able to contact enemy, and enemy exists
+        // remove enemy if specified
         if( contactEnemyCode == ON_CONTACT_ENEMY.REMOVE_ENEMY )
         {
             // remove the enemy if applicable
@@ -145,11 +143,11 @@ public abstract class Piece
             {
                 Turn turn = new Turn(board, start, end, this);
                 turn.RemovePiece(enemy);
-                return turn;
+                turns.Add(turn);
+                return true;
             }
         }
-
-        return null;
+        return false;
     }
 }
 
