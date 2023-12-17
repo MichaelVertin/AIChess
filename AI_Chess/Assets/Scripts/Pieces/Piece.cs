@@ -80,9 +80,6 @@ public abstract class Piece
 
         // calculate the scale
         physicalGO.transform.localScale = new Vector2(scale,scale);
-
-        // calcuate the color
-        physicalGO.GetComponent<Renderer>().material.color = owner.color;
     }
 
     // returns list of turns resulting from moving from start
@@ -106,36 +103,53 @@ public abstract class Piece
             testCoor = testCoor + stepSize;
         }
 
-        // apply contactEnemyCode
+        // get turn based on the movement for the piece
         Coor blockingCoor = testCoor;
-        switch(contactEnemyCode)
+        Turn turnOnBlockage = GetTurnByPosition(start, blockingCoor, contactEnemyCode);
+        if( turnOnBlockage != null )
         {
-            // case EXCLUDE: don't do anything more
-            case ON_CONTACT_ENEMY.EXCLUDE:
-                break;
-
-            // case REMOVE_ENEMY: move to position destroying enemy
-            case ON_CONTACT_ENEMY.REMOVE_ENEMY:
-                // check blocked by enemy
-                Piece enemy = board.GetEnemy(blockingCoor);
-                if (enemy != null)
-                {
-                    // create turn at blockingCoor,
-                    // remove the enemy at that coor
-                    Turn turn = new Turn(board, start, blockingCoor, this);
-                    turn.RemovePiece(enemy);
-                    turns.Add(turn);
-                }
-                break;
-
-            // case not accounted for: warn user
-            default:
-                Debug.Log("Warning: GetTurnsByLinearMovement " +
-                              "was given an unrecognized contactEnemyCode");
-                break;
+            turns.Add(turnOnBlockage);
         }
 
         return turns;
+    }
+
+    protected List<Turn> GetTurnsByLinearMovements(Coor start, List<Coor> directions,
+                   ON_CONTACT_ENEMY contactEnemyCode = ON_CONTACT_ENEMY.EXCLUDE)
+    {
+        List<Turn> turns = new List<Turn>();
+        foreach (Coor direction in directions)
+        {
+            turns.AddRange(GetTurnsByLinearMovement(
+                               this.coor, direction,
+                               contactEnemyCode));
+        }
+        return turns;
+    }
+    
+    protected Turn GetTurnByPosition(Coor start, Coor end, 
+                   ON_CONTACT_ENEMY contactEnemyCode = ON_CONTACT_ENEMY.EXCLUDE)
+    {
+        // move to the position if empty
+        if( board.IsEmpty(end) )
+        {
+            return new Turn(board, start, end, this);
+        }
+
+        // if able to contact enemy, and enemy exists
+        if( contactEnemyCode == ON_CONTACT_ENEMY.REMOVE_ENEMY )
+        {
+            // remove the enemy if applicable
+            Piece enemy = board.GetEnemy(end);
+            if( enemy != null )
+            {
+                Turn turn = new Turn(board, start, end, this);
+                turn.RemovePiece(enemy);
+                return turn;
+            }
+        }
+
+        return null;
     }
 }
 

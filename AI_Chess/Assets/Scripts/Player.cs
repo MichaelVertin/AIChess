@@ -6,18 +6,9 @@ using UnityEngine;
 public class Player
 {
     public int id;
-    public Color color;
     public Player( int id )
     {
         this.id = id;
-        if( this.id == 0 )
-        {
-            this.color = Color.white;
-        }
-        else
-        {
-            this.color = Color.black;
-        }
     }
 
     // called when given control of the Board
