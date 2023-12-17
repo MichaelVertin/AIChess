@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -117,16 +118,33 @@ public class Board : MonoBehaviour
             }
         }
 
+        Player player1 = players[0];
+        Player player2 = players[1];
 
         // initialize pieces
-        AddPiece(CreateBishop(new Coor(0, 0), players[0]));
-        AddPiece(CreateBasic(new Coor(1, 1), players[1]));
-        AddPiece(CreateBasic(new Coor(6, 6), players[0]));
-        AddPiece(CreateBishop(new Coor(7, 7), players[1]));
-        AddPiece(CreateBishop(new Coor(2, 0), players[0]));
-        AddPiece(CreateBishop(new Coor(0, 2), players[1]));
-        AddPiece(CreateBishop(new Coor(4, 4), players[0]));
-        AddPiece(CreateBishop(new Coor(5, 5), players[1]));
+        AddPiece(CreateRook(new Coor(0, 0), player1));
+        AddPiece(CreateRook(new Coor(7, 0), player1));
+        AddPiece(CreateKnight(new Coor(1, 0), player1));
+        AddPiece(CreateKnight(new Coor(6, 0), player1));
+        AddPiece(CreateBishop(new Coor(2, 0), player1));
+        AddPiece(CreateBishop(new Coor(5, 0), player1));
+        AddPiece(CreateKing(new Coor(3, 0), player1));
+        AddPiece(CreateQueen(new Coor(4, 0), player1));
+
+        AddPiece(CreateRook(new Coor(0, 7), player2));
+        AddPiece(CreateRook(new Coor(7, 7), player2));
+        AddPiece(CreateKnight(new Coor(1, 7), player2));
+        AddPiece(CreateKnight(new Coor(6, 7), player2));
+        AddPiece(CreateBishop(new Coor(2, 7), player2));
+        AddPiece(CreateBishop(new Coor(5, 7), player2));
+        AddPiece(CreateKing(new Coor(4, 7), player2));
+        AddPiece(CreateQueen(new Coor(3, 7), player2));
+
+        for( int pawnX = 0; pawnX <= 7; pawnX++ )
+        {
+            AddPiece(CreatePawn(new Coor(pawnX, 1), player1));
+            AddPiece(CreatePawn(new Coor(pawnX, 6), player2));
+        }
 
         // set player values
         playerTurn = players[0];
@@ -288,11 +306,30 @@ public class Board : MonoBehaviour
         return CreatePiece(newPieceCoor, owner, piece);
     }
 
-    public Piece CreateBasic(Coor newPieceCoor, Player owner)
+    public Piece CreateRook(Coor newPieceCoor, Player owner)
     {
-        Piece piece = new Basic();
+        Piece piece = new Rook();
         return CreatePiece(newPieceCoor, owner, piece);
     }
+
+    public Piece CreateKing(Coor newPieceCoor, Player owner)
+    {
+        Piece piece = new King();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
+    public Piece CreateQueen(Coor newPieceCoor, Player owner)
+    {
+        Piece piece = new Queen();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
+    public Piece CreateKnight(Coor newPieceCoor, Player owner)
+    {
+        Piece piece = new Knight();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
 
     // destroy the specified the piece
     public void DestroyPiece( Piece piece )
