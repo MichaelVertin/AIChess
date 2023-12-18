@@ -8,6 +8,7 @@ public class Player
 {
     public int id;
     public Coor direction;
+    public int promotionY;
 
     public Player( int id )
     {
@@ -17,11 +18,13 @@ public class Player
         if( id == 0 )
         {
             direction = new Coor(0, 1);
+            promotionY = GAME_SETTINGS.BOARD_WIDTH - 1;
         }
         // other players move backward
         else
         {
             direction = new Coor(0, -1);
+            promotionY = 0;
         }
     }
 

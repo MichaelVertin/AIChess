@@ -16,6 +16,7 @@ public abstract class Piece
     public Player owner; // owner of the piece
     private GameObject physicalGO = null; // reference to physical piece 
                                           //     seen by user
+    public int turnCount = 0;
 
     // prefab to create physicalGO
     public abstract GameObject physicalPrefab
