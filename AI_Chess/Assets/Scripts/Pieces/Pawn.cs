@@ -56,12 +56,14 @@ public class Pawn : Piece
 
         foreach( Turn turn in turns )
         {
+            /*
             if( turn.endCoor.y == owner.promotionY)
             {
                 Piece queen = board.CreateQueen(turn.endCoor, owner);
                 turn.AddPiece(queen);
                 turn.RemovePiece(this);
             }
+            */
         }
         return turns;
     }

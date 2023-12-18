@@ -122,7 +122,6 @@ public class Board : MonoBehaviour
         Player player2 = players[1];
 
         // initialize pieces
-        /*
         AddPiece(CreateRook(new Coor(0, 0), player1));
         AddPiece(CreateRook(new Coor(7, 0), player1));
         AddPiece(CreateKnight(new Coor(1, 0), player1));
@@ -140,7 +139,6 @@ public class Board : MonoBehaviour
         AddPiece(CreateBishop(new Coor(5, 7), player2));
         AddPiece(CreateKing(new Coor(4, 7), player2));
         AddPiece(CreateQueen(new Coor(3, 7), player2));
-        */
 
         for( int pawnX = 0; pawnX <= 7; pawnX++ )
         {

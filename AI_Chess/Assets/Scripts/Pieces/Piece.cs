@@ -131,7 +131,9 @@ public abstract class Piece
         // move to the position if empty
         if( board.IsEmpty(end) )
         {
-            turns.Add(new Turn(board, start, end, this));
+            Turn turn = new Turn(board);
+            turn.AddMovement(this, start, end);
+            turns.Add(turn);
             return true;
         }
 
@@ -142,7 +144,8 @@ public abstract class Piece
             Piece enemy = board.GetEnemy(end);
             if( enemy != null )
             {
-                Turn turn = new Turn(board, start, end, this);
+                Turn turn = new Turn(board);
+                turn.AddMovement(this, start, end);
                 turn.RemovePiece(enemy);
                 turns.Add(turn);
                 return true;
