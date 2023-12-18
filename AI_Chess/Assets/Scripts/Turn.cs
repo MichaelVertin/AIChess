@@ -3,59 +3,74 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+public class Movement
+{
+    public Piece movingPiece;
+    public Coor destination;
+    public Coor departure;
+    public Movement( Piece movingPiece, Coor departure, Coor destination )
+    {
+        this.movingPiece = movingPiece;
+        this.destination = destination;
+        this.departure = departure;
+    }
+}
+
 public class Turn
 {
     private Board board;
 
-    // start/end coordinate of movingPiece
-    public readonly Coor startCoor, endCoor;
-    private Piece movingPiece = null;
+    // list of movements
+    private List<Movement> movements = new List<Movement>();
 
-    // pieceRemoved/Created during the turn
-    private Piece pieceRemoved = null, pieceCreated = null;
+    // piecesRemoved/Created during the turn
+    private List<Piece> piecesRemoved = new List<Piece>();
+    private List<Piece> piecesCreated = new List<Piece>();
 
-    public Turn( Board boardPar, Coor startCoorPar, Coor endCoorPar, Piece piece)
+    public Turn( Board board )
     {
-        this.board = boardPar;
-        this.startCoor = startCoorPar;
-        this.endCoor = endCoorPar;
-        this.movingPiece = piece;
+        this.board = board;
     }
 
     // marks the specified piece to be removed during the turn
     public void RemovePiece(Piece piece)
     {
-        pieceRemoved = piece;
+        piecesRemoved.Add(piece);
     }
+
     // marks the specified piece to be added during the turn
     public void AddPiece(Piece piece)
     {
-        pieceCreated = piece;
+        piecesCreated.Add(piece);
+    }
+
+    // moves piece from startCoor to endCoor
+    public void AddMovement(Piece piece, Coor startCoor, Coor endCoor)
+    {
+        movements.Add(new Movement(piece, startCoor, endCoor));
     }
 
     // does the turn
     private void Do()
     {
-        // fail if movingPiece is not at the start
-        if( !ReferenceEquals(board.GetPosition(startCoor).piece, this.movingPiece) )
+        // remove/create pieces if applicable
+        foreach( Piece pieceRemoved in piecesRemoved )
         {
-            Debug.Log("Attempted to Do turn when the movingPiece is no longer at startCoor");
-            return;
+            board.RemovePiece(pieceRemoved);
         }
 
-        // remove/create pieces if applicable
-        if (pieceRemoved != null)
-            { board.RemovePiece(pieceRemoved); }
-        if (pieceCreated != null)
-            { board.AddPiece(pieceCreated); }
+        foreach (Piece pieceCreated in piecesCreated)
+        {
+            board.AddPiece(pieceCreated);
+        }
 
-        if (!ReferenceEquals(pieceRemoved, movingPiece))
+        foreach( Movement movement in  movements)
         {
             // move the moving piece to endCoor
-            movingPiece.coor = endCoor;
-            board.GetPosition(endCoor).piece = movingPiece;
-            board.GetPosition(startCoor).piece = null;
-            movingPiece.turnCount++;
+            board.GetPosition(movement.departure).piece = null;
+            movement.movingPiece.coor = movement.destination;
+            board.GetPosition(movement.destination).piece = movement.movingPiece;
+            movement.movingPiece.turnCount++;
         }
 
         // add the turn to the board's history
@@ -78,27 +93,25 @@ public class Turn
         //    remove this from history
         board.history.Pop();
 
-        // fail if movingPiece is not at the endCoor
-        if (!ReferenceEquals(board.GetPosition(endCoor).piece, this.movingPiece))
+        foreach (Movement movement in movements)
         {
-            Debug.Log("Attempted to Undo turn when the movingPiece is no longer at endCoor");
-            return;
+            // move the moving piece to endCoor
+            board.GetPosition(movement.destination).piece = null;
+            movement.movingPiece.coor = movement.departure;
+            board.GetPosition(movement.departure).piece = movement.movingPiece;
+            movement.movingPiece.turnCount--;
         }
 
-        // move the movingPiece back to startCoor
-        if( !ReferenceEquals(movingPiece,pieceRemoved))
+        // remove/create pieces
+        foreach( Piece pieceRemoved in piecesRemoved )
         {
-            movingPiece.coor = startCoor;
-            board.GetPosition(startCoor).piece = movingPiece;
-            board.GetPosition(endCoor).piece = null;
-            movingPiece.turnCount--;
+            board.AddPiece(pieceRemoved);
         }
-
-        // remove/create pieces if applicable
-        if (pieceRemoved != null)
-            { board.AddPiece(pieceRemoved); }
-        if (pieceCreated != null)
-            { board.DestroyPiece(pieceCreated); }
+        foreach (Piece pieceCreated in piecesRemoved)
+        {
+            board.RemovePiece(pieceCreated);
+            board.DestroyPiece(pieceCreated);
+        }
 
         // select the previous player
         board.PrevPlayerTurn();
