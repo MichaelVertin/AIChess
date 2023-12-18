@@ -8,7 +8,7 @@ public class Turn
     private Board board;
 
     // start/end coordinate of movingPiece
-    private Coor startCoor, endCoor;
+    public readonly Coor startCoor, endCoor;
     private Piece movingPiece = null;
 
     // pieceRemoved/Created during the turn
@@ -49,10 +49,14 @@ public class Turn
         if (pieceCreated != null)
             { board.AddPiece(pieceCreated); }
 
-        // move the moving piece to endCoor
-        movingPiece.coor = endCoor;
-        board.GetPosition(endCoor).piece = movingPiece;
-        board.GetPosition(startCoor).piece = null;
+        if (!ReferenceEquals(pieceRemoved, movingPiece))
+        {
+            // move the moving piece to endCoor
+            movingPiece.coor = endCoor;
+            board.GetPosition(endCoor).piece = movingPiece;
+            board.GetPosition(startCoor).piece = null;
+            movingPiece.turnCount++;
+        }
 
         // add the turn to the board's history
         board.history.Push(this);
@@ -82,9 +86,13 @@ public class Turn
         }
 
         // move the movingPiece back to startCoor
-        movingPiece.coor = startCoor;
-        board.GetPosition(startCoor).piece = movingPiece;
-        board.GetPosition(endCoor).piece = null;
+        if( !ReferenceEquals(movingPiece,pieceRemoved))
+        {
+            movingPiece.coor = startCoor;
+            board.GetPosition(startCoor).piece = movingPiece;
+            board.GetPosition(endCoor).piece = null;
+            movingPiece.turnCount--;
+        }
 
         // remove/create pieces if applicable
         if (pieceRemoved != null)

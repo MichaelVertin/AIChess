@@ -28,15 +28,12 @@ public class Pawn : Piece
         if(AddTurnByPosition(turns, this.coor, this.coor + direction,
                                            ON_CONTACT_ENEMY.EXCLUDE))
         {
-            /* // waiting for moveCount to be implemented
-            // if albe to move one up, try again (also exluding enemy)
-            turn = GetTurnByPosition(this.coor, this.coor + direction * 2, 
-                                     ON_CONTACT_ENEMY.EXCLUDE);
-            if( turn != null)
+            // if first time moving, also try to move two up (also exluding enemy)
+            if( turnCount == 0 )
             {
-                turns.Add(turn);
+                AddTurnByPosition(turns, this.coor, this.coor + direction * 2,
+                         ON_CONTACT_ENEMY.EXCLUDE);
             }
-            */
         }
 
         Coor forwardRight = this.coor + direction + right;
@@ -55,6 +52,16 @@ public class Pawn : Piece
         {
             AddTurnByPosition(turns, this.coor, forwardLeft,
                                      ON_CONTACT_ENEMY.REMOVE_ENEMY);
+        }
+
+        foreach( Turn turn in turns )
+        {
+            if( turn.endCoor.y == owner.promotionY)
+            {
+                Piece queen = board.CreateQueen(turn.endCoor, owner);
+                turn.AddPiece(queen);
+                turn.RemovePiece(this);
+            }
         }
         return turns;
     }
