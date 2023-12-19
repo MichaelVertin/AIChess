@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -25,13 +26,14 @@ public class Pawn : Piece
         Coor direction = owner.direction;
 
         // try to move one up, excluding enemy
-        if(AddTurnByPosition(turns, this.coor, this.coor + direction,
-                                           ON_CONTACT_ENEMY.EXCLUDE))
+        if(AddAndCheckForPromotion(turns, this.coor, this.coor + direction,
+                                   ON_CONTACT_ENEMY.EXCLUDE))
         {
             // if first time moving, also try to move two up (also exluding enemy)
             if( turnCount == 0 )
             {
-                AddTurnByPosition(turns, this.coor, this.coor + direction * 2,
+                Coor endCoor = this.coor + direction * 2;
+                AddTurnByPosition(turns, this.coor, endCoor,
                          ON_CONTACT_ENEMY.EXCLUDE);
             }
         }
@@ -41,7 +43,7 @@ public class Pawn : Piece
         //     get the turn removing the enemy
         if (board.GetEnemy(forwardRight) != null)
         {
-            AddTurnByPosition(turns, this.coor, forwardRight,
+            AddAndCheckForPromotion(turns, this.coor, forwardRight,
                                      ON_CONTACT_ENEMY.REMOVE_ENEMY);
         }
 
@@ -50,21 +52,38 @@ public class Pawn : Piece
         //     get the turn removing that enemy
         if (board.GetEnemy(forwardLeft) != null)
         {
-            AddTurnByPosition(turns, this.coor, forwardLeft,
+            AddAndCheckForPromotion(turns, this.coor, forwardLeft,
                                      ON_CONTACT_ENEMY.REMOVE_ENEMY);
         }
 
-        foreach( Turn turn in turns )
-        {
-            /*
-            if( turn.endCoor.y == owner.promotionY)
-            {
-                Piece queen = board.CreateQueen(turn.endCoor, owner);
-                turn.AddPiece(queen);
-                turn.RemovePiece(this);
-            }
-            */
-        }
         return turns;
+    }
+
+    private bool AddAndCheckForPromotion(List<Turn> turns, 
+                                         Coor startCoor, 
+                                         Coor endCoor,
+                                         ON_CONTACT_ENEMY contactEnemyCode)
+    {
+        // first, try to add the promotion
+        if( AddTurnByPosition(turns, startCoor, endCoor, contactEnemyCode) )
+        {
+            Turn turn = turns[turns.Count - 1];
+
+            // check for a promotion
+            if (owner.promotionY == endCoor.y)
+            {
+                // add a queen at the end coor, owned by the same player
+                turn.AddPiece(board.CreateQueen(endCoor, owner));
+                // delete the pawn
+                turn.RemovePiece(this);
+
+                // inform turn that movement can be ignored
+                turn.IgnoreMovement();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

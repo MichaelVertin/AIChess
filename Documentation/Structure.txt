@@ -153,6 +153,7 @@ Board.playerInControl|
 Piece.coor           | Turn
 Piece.isActive       | Board
 Piece.owner          | 
+Piece.turnCount      | Turn
 Turn.start/endPos    | 
 Turn.pieceRemoved    | 
 Position.piece       | Turn, Board

@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class King : Piece
@@ -46,35 +48,32 @@ public class King : Piece
          */
         if( this.turnCount == 0 )
         {
-            foreach( int xRookCoor in new List<int> { 0, GAME_SETTINGS.BOARD_WIDTH})
+            // check for left/right castle
+            foreach( int xDir in new List<int> { -1, 1 } )
             {
-                bool allCoordinatesEmpty = true;
-                // iterate between rook and king's x-components (exclusive)
-                for( int emptyX = Mathf.Min(xRookCoor,this.coor.x) + 1;
-                         emptyX < Mathf.Max(xRookCoor,this.coor.x);
-                                emptyX++)
+                // iterate from the king to the next blocking position
+                Coor coorIter = this.coor;
+                coorIter.x += xDir;
+                while( board.IsEmpty(coorIter ) )
                 {
-                    // skip the rook if the coordinate is not empty
-                    if( !board.IsEmpty(new Coor(emptyX,this.coor.y)))
-                    {
-                        allCoordinatesEmpty = false;
-                        break;
-                    }
+                    coorIter.x += xDir;
                 }
 
-                if( allCoordinatesEmpty )
+                // check stopped at friendly rook that hasn't moved yet
+                Piece rook = board.GetFriend(coorIter);
+                if( rook != null && rook.turnCount == 0 )
                 {
-                    Coor rookCoor = new Coor(xRookCoor, this.coor.y);
-                    Piece rookPiece = board.GetFriend(rookCoor);
+                    // store rook/king start
+                    Coor rookStart = coorIter;
+                    Coor kingStart = this.coor;
 
-                    if( rookPiece != null && rookPiece.turnCount == 0 )
-                    {
-                        Coor endCoor = new Coor(this.coor.x + System.Math.Sign(rookCoor.x - this.coor.x) * 2, this.coor.y);
-                        AddTurnByPosition(turns, this.coor, rookCoor);
-                    }
+                    // king moves 2 in the x direction
+                    // rook moves 1 in opposite x direction from king's end coordinate
+                    Coor kingEnd = new Coor(this.coor.x + xDir * 2, this.coor.y);
+                    Coor rookEnd = new Coor(kingEnd.x - xDir, kingEnd.y);
                 }
+
             }
-
         }
 
         return turns;

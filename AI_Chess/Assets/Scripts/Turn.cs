@@ -50,6 +50,12 @@ public class Turn
         movements.Add(new Movement(piece, startCoor, endCoor));
     }
 
+    // remove all movement requests
+    public void IgnoreMovement()
+    {
+        movements = new List<Movement>();
+    }
+
     // does the turn
     private void Do()
     {
