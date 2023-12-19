@@ -125,7 +125,7 @@ public abstract class Piece
         return turns;
     }
     
-    protected bool AddTurnByPosition(List<Turn> turns, Coor start, Coor end, 
+    public bool AddTurnByPosition(List<Turn> turns, Coor start, Coor end, 
                    ON_CONTACT_ENEMY contactEnemyCode = ON_CONTACT_ENEMY.EXCLUDE)
     {
         // move to the position if empty
