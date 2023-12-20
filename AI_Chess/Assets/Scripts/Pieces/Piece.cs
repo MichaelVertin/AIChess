@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -32,7 +33,11 @@ public abstract class Piece
         isActive = false;
     }
 
-    // return turns that involve this
+
+
+    /////////////////////// accessing turns of piece ///////////////////////////
+    // return all turns that involve this
+    // NOTE: some turns may not be legal
     public List<Turn> GetTurns()
     {
         // fail if not active or not owner's turn
@@ -44,12 +49,22 @@ public abstract class Piece
         return GetPieceTurns();
     }
 
+    // method where subclass will inform Piece how it works
     public abstract List<Turn> GetPieceTurns();
 
     // return legal turns that involve this
     public List<Turn> GetLegalTurns()
     {
-        // TODO: implement check rules here
+        List<Turn> turns = new List<Turn>();
+
+        // only select turns that can be verified
+        foreach( Turn turn in GetTurns() )
+        {
+            if( turn.Verify() )
+            {
+                turns.Add( turn );
+            }
+        }
         // return all available turns
         return GetTurns();
     }
@@ -88,6 +103,11 @@ public abstract class Piece
         physicalGO.transform.localScale = new Vector2(scale,scale);
     }
 
+
+
+
+    ////////////////////// tools to generate Turns /////////////////////////////
+    
     // returns list of turns resulting from moving from start
     //                                to start+stepSize for each iteration
     // contactEnemyCode.EXCLUDE: stop before enemy

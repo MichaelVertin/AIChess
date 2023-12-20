@@ -7,188 +7,127 @@ Coor: coordinate on a board
 Player: identifies and does turns
 
 
-///////////////// attributes/methods /////////////////
-Board:Monobehaviour
-    pieces:List<Piece>
-    positions:2DArray<Position>
-    history:Stack<Turn>
-    players:List<Player>
-    playerTurn:PlayerID
-    playerInControl:PlayerID
-    state:BOARD_STATE
-    GetFriend(Coor):bool
-    GetEnemy(Coor):bool
-    GetPiece(Coor):bool
-    IsEmpty(Coor):bool
-    UpdatePhysical():void
-    PassControl(Player):void
-    Next/PrevPlayerTurn():void
-    CreatePiece(Coor,Player,GameObject)
-    DestroyPiece(Piece):void
-    AddPiece(Piece):void
-    RemovePiece(Piece):void
-    
+//////////////////////////////////// access ////////////////////////////////////
+R: read data from object
+W: change object
+E: make object do something
 
-Piece:Monobehaviour
-    board:Board
-    coor:Coor
-    owner:Player
-    isActive:bool
-    GetTurns():List<Turn>
-    GetLegalTurns():List<Turn>
-    UpdatePhysical():void
+                  | Board | Piece | Turn | Player |
+Board.pieces      | R--   | R--   | RW-  | R--    |
+Board.history     | ---   | ---   | RW-  | ---    |
+Board.playerTurn  | ---   | R--   | -W-  | ---    |
+Board.playerInC.. | ---   | ---   | ---  | RW-    |
+Board.state       | -W-   | ---   | R--  | ---    |
+Board.positions   | ---   | R--   | ---  | ---    |
+Board.physical    | ---   | ---   | ---  | --E    |
 
-Turn
-    startPos:Position
-    endPos:Position
-    pieceRemoved:Piece
-    pieceCreated:Piece
-    board:Board
-    Do():void
-    Undo():void
-    Verify():bool
-    DoIfVerified():bool
-    RemovePiece(Piece):void
-    AddPiece(Piece):void
+Piece.physical    | --E   | RW-   | ---  | ---    |
+Piece.turnCount   | ---   | ---   | -W-  | ---    |
+Piece.coor        | R--   | ---   | RW-  | ---    |
+Piece.turns       | ---   | -W-   | ---  | R--    |
 
-Position
-    piece:Piece
+Turn.*            | ---   | -W-   | --E  | --E    |
 
-Player:
-    id:PlayerID
-    OnControlStart():void
+Player.*          | R-E   | R--   | ---  | ---    |
 
 
+Board.pieces
+   R: pieces, GetPiece(), GetFriend(), GetEnemy()
+   W: Create(), AddPiece(), RemovePiece(), DestroyPiece()
+
+Board.history
+   R/W: history
+   E: Turn.*
+
+Board.playerTurn
+   R: playerTurn
+   W: NextPlayerTurn(), PrevPlayerTurn()
+   E: PassControl()
+
+Board.playerInControl
+   R: playerInControl
+   W: PassControl()
+
+Board.state
+   R: state
+
+Board.positions
+   R: GetPosition(), IsEmpty()
+
+Board.physical
+   R: transform
+   E: UpdatePhsyical()
 
 
-///////////////// processing //////////////////
+Piece.physical
+   E: UpdatePhysical()
+
+Piece.turnCount
+   R/W: turnCount
+
+Piece.coor
+   R/W: coor
+
+Piece.turns
+   R: GetTurns(), GetLegalTurns()
+
+
+Turn.*
+   R: Verify()
+   W: AddPiece(), RemovePiece(), AddMovement()
+   E: Do(), Undo(), DoIfVerified()
+
+
+Player.*
+   R/W: id, direction, promotionY, baseY
+   E: OnControlStart()
+
+
+
+
+///////////////// descriptions //////////////////
 Board:
-    GetFriend/GetEnemy/GetPiece:
-        returns the specified item at the coordinate, 
-        if not exists, returns null
-        (friend/enemy is determined by playerTurn)
+    pieces:
+     - list of all pieces active on the board
+    history:
+     - record of turns made
+     - top turn was the last made
+    playerTurn:
+     - owner of pieces that can take their turn
     playerInControl:
-        returns which player is in control of the pieces
+     - player who controls turns
     state:
-        returns GAME_OVER,INVALID,IN_PROGRESS
-    UpdatePhysical():
-        updates physical position of all pieces
-    PassControl():
-        starts next players turn, 
-        updates player in control
-    Next/PrevPlayerTurn():
-        change the player turn
-    CreatePiece():
-        create a piece (not placed on the board yet)
-    DestroyPiece():
-        destroys a piece (does not remove from board)
-    AddPiece():
-        add a piece to the board
-    RemovePiece():
-        removes a piece from the board
+     - state of board (IN_PROGRESS,GAME_OVER,INVALID)
+    positions:
+     - locations on the board that contain up to one piece
+    physical:
+     - board and pieces seen by user
 
 Piece:
-    isActive:
-        is this involved in gameplay, or removed from the board? 
-
-    GetTurns():
-        returns empty list if the owner is not active
-        otherwise, returns a list of turns the piece can make, 
-            not considering safety of king. 
-    GetLegalTurns():
-        returns a list of legal turns
-    UpdatePhysical():
-        updates position of the piece, 
-        if the piece is not active, 
-            the updated position is off of the board
+    physical:
+     - piece seen by the user
+    turnCount:
+     - number of times the piece has been moved
+        - undoing turn decreases this value
+    coor:
+     - coorinate of the piece on the board
+    turns:
+     - list of turns the piece can make
 
 Turn:
-    start/endPos:
-        Position of the piece being moved during the turn
-    pieceRemoved/Created:
-        reference to piece that was removed/created during the turn
-
-    Do():
-        moves the piece at startPos to endPos, 
-        sets pieceRemoved to inactive if exists, 
-        sets pieceCreated to active if exists, 
-        adds this into board history, 
-        sets playerTurn to the next player
-    Undo():
-        moves the piece at endPos to startPos, 
-        sets pieceRemoved to active if exists, 
-        destroys pieceCreated to inactive if exists, 
-        removes this from board history, 
-        sets playerTurn to the previous player
-    Verify():
-        does the turn, 
-        checks the state of the board is valid, 
-        undoes the turn
-    DoIfVerified():
-        does the turn, 
-        if the state of the board is invalid, 
-            undoes the turn, report failure
-        otherwise, report success
-    RemovePiece():
-        makrs a piece to be removed during the turn
-    AddPiece():
-        marks a piece to be added during the turn
-
-
+    movements:
+     - list of pieces and their departure/destination 
+       coordinates when executed
+    removed pieces:
+     - list of pieces to be removed when executed
+    added pieces:
+     - list of pieces to be created when executed
+    
 Player:
-    OnControlStart():
-        default moves a random piece
-
-
-
-//////////////////// access //////////////////
-   attribute         |    who will modify/call
-================================================
-Board.pieces         | 
-Board.history        | Turn
-Board.players        | 
-Board.nextPlayerTurn | 
-Board.state          | 
-Board.playerInControl| 
-Piece.coor           | Turn
-Piece.isActive       | Board
-Piece.owner          | 
-Piece.turnCount      | Turn
-Turn.start/endPos    | 
-Turn.pieceRemoved    | 
-Position.piece       | Turn, Board
-
-Board.GetPosition    | Piece,Turn
-Board.GetFriend      | Piece
-Board.UpdatePhysical | 
-Board.PassControl    | Player
-Board.NextPlayerTurn | Turn
-Board.CreatePiece    | Piece
-Board.AddPiece       | Turn
-Piece.GetTurns       | Player
-Piece.GetLegalTurns  | Player
-Piece.UpdatePhysical | Board
-Turn.Do              | 
-Turn.Undo            | Player
-Turn.Verify          | Player
-Turn.DoIfVerified    | Player
-Player.OnControlStart| Board
-
-
-
-///////////////// rules of flow ///////////////////
-Board.pieces
- - contains all pieces that exist on the board or in history, 
-   each piece's isActive and position is updated with history
-    - true before and after any Turn method
-Board.playerTurn
- - playerTurn is the player after the last turn in history
-    - true before and after any Turn method
-Board.playerInControl
- - the player in control of piece movement (other players control pieces)
-    - true before and after any Player method
-
-All other attributes must be updated before any method call. 
+    id: unique id for each player (starts at 0)
+    direction: direction that a pawn would move
+    promotionY: y coordinate when pawns can be promoted
+    baseY: y coordinate where pieces are created
 
 
 
