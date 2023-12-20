@@ -72,13 +72,25 @@ public class Pawn : Piece
             // check for a promotion
             if (owner.promotionY == endCoor.y)
             {
-                // add a queen at the end coor, owned by the same player
-                turn.AddPiece(new QueenType(endCoor, owner, board));
-                // delete the pawn
-                turn.RemovePiece(this);
+                // remove the created turn
+                turns.RemoveAt(turns.Count - 1);
 
-                // inform turn that movement can be ignored
-                turn.IgnoreMovement();
+                // create each type of piece
+                List<PieceType> createdPieces = new List<PieceType>();
+                createdPieces.Add(new QueenType(endCoor, owner, board));
+                createdPieces.Add(new RookType(endCoor, owner, board));
+                createdPieces.Add(new BishopType(endCoor, owner, board));
+                createdPieces.Add(new KnightType(endCoor, owner, board));
+
+                // create the created piece and destroy the pawn 
+                //    for each created piece
+                foreach( PieceType createdPiece in createdPieces )
+                {
+                    turn = new Turn(board);
+                    turn.AddPiece(createdPiece);
+                    turn.RemovePiece(this);
+                    turns.Add(turn);
+                }
             }
 
             return true;

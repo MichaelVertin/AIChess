@@ -4,8 +4,8 @@ using UnityEditor;
 using UnityEngine;
 
 
-
-// workaround for not being able to use Type in a template
+///////////////////////////////////////// PieceType ////////////////////////////
+// workaround to use Type in a template
 // Calls board.Create when PieceType.create is called
 public abstract class PieceType
 {
@@ -70,16 +70,40 @@ public class KnightType : PieceType
     { piece = board.Create<Knight>(coor, owner); }
 }
 
+
+// PieceMovement:
+// Holds data to move piece from departure to destination
+// does not provide error handling
 public class PieceMovement
 {
-    public Piece movingPiece;
-    public Coor destination;
-    public Coor departure;
-    public PieceMovement( Piece movingPiece, Coor departure, Coor destination )
+    private Piece movingPiece;
+    private Coor destination;
+    private Coor departure;
+    private Board board;
+    public PieceMovement(Board board, Piece movingPiece, Coor departure, Coor destination)
     {
         this.movingPiece = movingPiece;
         this.destination = destination;
         this.departure = departure;
+        this.board = board;
+    }
+
+    public void Do()
+    {
+        // move the moving piece to endCoor
+        board.GetPosition(departure).piece = null;
+        movingPiece.coor = destination;
+        board.GetPosition(destination).piece = movingPiece;
+        movingPiece.turnCount++;
+    }
+
+    public void Undo()
+    {
+        // move the moving piece to startCoor
+        board.GetPosition(destination).piece = null;
+        movingPiece.coor = departure;
+        board.GetPosition(departure).piece = movingPiece;
+        movingPiece.turnCount--;
     }
 }
 
@@ -94,6 +118,8 @@ public class Turn
     private List<Piece> piecesRemoved = new List<Piece>();
     private List<PieceType> piecesCreated = new List<PieceType>();
 
+
+    ////////////////////////////////// creating Turn ///////////////////////////
     public Turn( Board board )
     {
         this.board = board;
@@ -114,17 +140,15 @@ public class Turn
     // moves piece from startCoor to endCoor
     public void AddMovement(Piece piece, Coor startCoor, Coor endCoor)
     {
-        movements.Add(new PieceMovement(piece, startCoor, endCoor));
+        movements.Add(new PieceMovement(board, piece, startCoor, endCoor));
     }
 
-    // remove all movement requests
-    public void IgnoreMovement()
-    {
-        movements = new List<PieceMovement>();
-    }
 
+    //////////////////////////// perform turns /////////////////////////////////
     // does the turn
-    private void Do()
+    // NOTE: does not ensure the turn is legal
+    //       (may make the king vulnerable)
+    public void Do()
     {
         // remove/create pieces if applicable
         foreach( Piece pieceRemoved in piecesRemoved )
@@ -137,13 +161,10 @@ public class Turn
             pieceCreated.CreateAndAdd();
         }
 
+        // do all the movements
         foreach(PieceMovement movement in  movements)
         {
-            // move the moving piece to endCoor
-            board.GetPosition(movement.departure).piece = null;
-            movement.movingPiece.coor = movement.destination;
-            board.GetPosition(movement.destination).piece = movement.movingPiece;
-            movement.movingPiece.turnCount++;
+            movement.Do();
         }
         
         // add the turn to the board's history
@@ -166,13 +187,10 @@ public class Turn
         //    remove this from history
         board.history.Pop();
 
+        // undo all the movements
         foreach (PieceMovement movement in movements)
         {
-            // move the moving piece to endCoor
-            board.GetPosition(movement.destination).piece = null;
-            movement.movingPiece.coor = movement.departure;
-            board.GetPosition(movement.departure).piece = movement.movingPiece;
-            movement.movingPiece.turnCount--;
+            movement.Undo();
         }
 
         // remove/create pieces

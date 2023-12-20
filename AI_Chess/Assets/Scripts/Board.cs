@@ -1,13 +1,6 @@
-using JetBrains.Annotations;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using Unity.VisualScripting;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.TerrainUtils;
-using UnityEngine.UIElements;
 
 
 public enum BoardState
@@ -107,8 +100,9 @@ public class Board : MonoBehaviour
             return pieces;
         }
     }
-    
-    
+
+
+    /////////////////////////// Initialize game of chess ///////////////////////
     void Start()
     {
         // initialize players
@@ -130,28 +124,30 @@ public class Board : MonoBehaviour
         Player player2 = players[1];
 
         // initialize pieces
-        AddPiece(CreateKing(new Coor(3, 0), player1));
-        AddPiece(CreateRook(new Coor(0, 0), player1));
-        AddPiece(CreateRook(new Coor(7, 0), player1));
-        AddPiece(CreateKnight(new Coor(1, 0), player1));
-        AddPiece(CreateKnight(new Coor(6, 0), player1));
-        AddPiece(CreateBishop(new Coor(2, 0), player1));
-        AddPiece(CreateBishop(new Coor(5, 0), player1));
-        AddPiece(CreateQueen(new Coor(4, 0), player1));
+        /*
+        AddPiece(Create<King>(new Coor(3, 0), player1));
+        AddPiece(Create<Rook>(new Coor(0, 0), player1));
+        AddPiece(Create<Rook>(new Coor(7, 0), player1));
+        AddPiece(Create<Knight>(new Coor(1, 0), player1));
+        AddPiece(Create<Knight>(new Coor(6, 0), player1));
+        AddPiece(Create<Bishop>(new Coor(2, 0), player1));
+        AddPiece(Create<Bishop>(new Coor(5, 0), player1));
+        AddPiece(Create<Queen>(new Coor(4, 0), player1));
 
-        AddPiece(CreateKing(new Coor(4, 7), player2));
-        AddPiece(CreateRook(new Coor(0, 7), player2));
-        AddPiece(CreateRook(new Coor(7, 7), player2));
-        AddPiece(CreateKnight(new Coor(1, 7), player2));
-        AddPiece(CreateKnight(new Coor(6, 7), player2));
-        AddPiece(CreateBishop(new Coor(2, 7), player2));
-        AddPiece(CreateBishop(new Coor(5, 7), player2));
-        AddPiece(CreateQueen(new Coor(3, 7), player2));
+        AddPiece(Create<King>(new Coor(4, 7), player2));
+        AddPiece(Create<Rook>(new Coor(0, 7), player2));
+        AddPiece(Create<Rook>(new Coor(7, 7), player2));
+        AddPiece(Create<Knight>(new Coor(1, 7), player2));
+        AddPiece(Create<Knight>(new Coor(6, 7), player2));
+        AddPiece(Create<Bishop>(new Coor(2, 7), player2));
+        AddPiece(Create<Bishop>(new Coor(5, 7), player2));
+        AddPiece(Create<Queen>(new Coor(3, 7), player2));
+        */
 
         for ( int pawnX = 0; pawnX < GAME_SETTINGS.BOARD_WIDTH; pawnX++ )
         {
             AddPiece(Create<Pawn>(new Coor(pawnX, 1), player1));
-            AddPiece(CreatePawn(new Coor(pawnX, 6), player2));
+            AddPiece(Create<Pawn>(new Coor(pawnX, 6), player2));
         }
 
         // set player values
@@ -163,6 +159,8 @@ public class Board : MonoBehaviour
         playerTurn.OnControlStart(this);
     }
 
+
+    /////////////////////////// Get Coordinate Info ////////////////////////////
     // returns a friend piece on testCoor, 
     // if no friend piece, returns null
     public Piece GetFriend(Coor testCoor)
@@ -248,6 +246,8 @@ public class Board : MonoBehaviour
         }
     }
 
+
+    // update Monobehaviours seen by the user
     public void UpdatePhysical()
     {
         // update all pieces in the board (include inactive)
@@ -309,42 +309,10 @@ public class Board : MonoBehaviour
         return piece;
     }
 
-    public Piece CreateBishop( Coor newPieceCoor, Player owner )
-    {
-        Piece piece = new Bishop();
-        return CreatePiece(newPieceCoor, owner, piece);
-    }
-
-    public Piece CreatePawn(Coor newPieceCoor, Player owner)
-    {
-        Piece piece = new Pawn();
-        return CreatePiece(newPieceCoor, owner, piece);
-    }
-
-    public Piece CreateRook(Coor newPieceCoor, Player owner)
-    {
-        Piece piece = new Rook();
-        return CreatePiece(newPieceCoor, owner, piece);
-    }
-
-    public Piece CreateKing(Coor newPieceCoor, Player owner)
-    {
-        Piece piece = new King();
-        return CreatePiece(newPieceCoor, owner, piece);
-    }
-
-    public Piece CreateQueen(Coor newPieceCoor, Player owner)
-    {
-        Piece piece = new Queen();
-        return CreatePiece(newPieceCoor, owner, piece);
-    }
-
-    public Piece CreateKnight(Coor newPieceCoor, Player owner)
-    {
-        Piece piece = new Knight();
-        return CreatePiece(newPieceCoor, owner, piece);
-    }
-
+    // create piece at newPieceCoor with the specified owner
+    // PieceType is the Piece subclass to be created
+    // NOTE: after if is created, must be 'AddPiece'
+    //       before it becomes active on the board
     public Piece Create<PieceType>(Coor newPieceCoor, Player owner)
                      where PieceType : Piece, new()
     {
@@ -395,7 +363,7 @@ public class Board : MonoBehaviour
     {
         if (testPlayer.DoTurn())
         {
-            Invoke("TesterPlayerUndoTurn", 2.0f);
+            Invoke("TesterPlayerUndoTurn", 0.1f);
         }
         else
         {
@@ -407,7 +375,7 @@ public class Board : MonoBehaviour
     {
         if (testPlayer.UndoTurn())
         {
-            Invoke("TesterPlayerDoTurn", .25f);
+            Invoke("TesterPlayerDoTurn", .01f);
         }
         else
         {
