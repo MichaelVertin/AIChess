@@ -52,7 +52,7 @@ public class King : Piece
             foreach( int xDir in new List<int> { -1, 1 } )
             {
                 // iterate from the king to the next blocking position
-                Coor coorIter = this.coor;
+                Coor coorIter = new Coor(this.coor);
                 coorIter.x += xDir;
                 while( board.IsEmpty(coorIter ) )
                 {
@@ -61,7 +61,8 @@ public class King : Piece
 
                 // check stopped at friendly rook that hasn't moved yet
                 Piece rook = board.GetFriend(coorIter);
-                if( rook != null && rook.turnCount == 0 )
+                if( ( coorIter.x == 0 || coorIter.x == GAME_SETTINGS.BOARD_WIDTH - 1 ) && 
+                    rook != null && rook.turnCount == 0 )
                 {
                     // store rook/king start
                     Coor rookStart = coorIter;
@@ -71,6 +72,11 @@ public class King : Piece
                     // rook moves 1 in opposite x direction from king's end coordinate
                     Coor kingEnd = new Coor(this.coor.x + xDir * 2, this.coor.y);
                     Coor rookEnd = new Coor(kingEnd.x - xDir, kingEnd.y);
+
+                    Turn turn = new Turn(board);
+                    turn.AddMovement(rook, rookStart, rookEnd);
+                    turn.AddMovement(this, kingStart, kingEnd);
+                    turns.Add(turn);
                 }
 
             }
