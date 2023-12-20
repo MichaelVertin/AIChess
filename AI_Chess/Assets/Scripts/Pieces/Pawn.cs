@@ -73,7 +73,7 @@ public class Pawn : Piece
             if (owner.promotionY == endCoor.y)
             {
                 // add a queen at the end coor, owned by the same player
-                turn.AddPiece(board.CreateQueen(endCoor, owner));
+                turn.AddPiece(new QueenType(endCoor, owner, board));
                 // delete the pawn
                 turn.RemovePiece(this);
 

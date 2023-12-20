@@ -3,12 +3,79 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class Movement
+
+
+// workaround for not being able to use Type in a template
+// Calls board.Create when PieceType.create is called
+public abstract class PieceType
+{
+    protected Coor coor;
+    protected Player owner;
+    protected Board board;
+    protected Piece piece = null;
+
+    public PieceType(Coor coor, Player owner, Board board)
+    {
+        this.coor = coor;
+        this.owner = owner;
+        this.board = board;
+    }
+
+    public void CreateAndAdd()
+    {
+        Create();
+        board.AddPiece(piece);
+    }
+    protected abstract void Create();
+    public void Uncreate()
+    {
+        board.DestroyPiece(piece);
+    }
+}
+
+public class KingType : PieceType
+{
+    public KingType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    protected override void Create()
+    { piece = board.Create<King>(coor, owner); }
+}
+public class PawnType : PieceType
+{
+    public PawnType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    protected override void Create()
+    { piece = board.Create<Pawn>(coor, owner); }
+}
+public class RookType : PieceType
+{
+    public RookType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    protected override void Create()
+    { piece = board.Create<Rook>(coor, owner); }
+}
+public class BishopType : PieceType
+{
+    public BishopType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    protected override void Create()
+    { piece = board.Create<Bishop>(coor, owner); }
+}
+public class QueenType : PieceType
+{
+    public QueenType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    protected override void Create()
+    { piece = board.Create<Queen>(coor, owner); }
+}
+public class KnightType : PieceType
+{
+    public KnightType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    protected override void Create()
+    { piece = board.Create<Knight>(coor, owner); }
+}
+
+public class PieceMovement
 {
     public Piece movingPiece;
     public Coor destination;
     public Coor departure;
-    public Movement( Piece movingPiece, Coor departure, Coor destination )
+    public PieceMovement( Piece movingPiece, Coor departure, Coor destination )
     {
         this.movingPiece = movingPiece;
         this.destination = destination;
@@ -21,11 +88,11 @@ public class Turn
     private Board board;
 
     // list of movements
-    private List<Movement> movements = new List<Movement>();
+    private List<PieceMovement> movements = new List<PieceMovement>();
 
     // piecesRemoved/Created during the turn
     private List<Piece> piecesRemoved = new List<Piece>();
-    private List<Piece> piecesCreated = new List<Piece>();
+    private List<PieceType> piecesCreated = new List<PieceType>();
 
     public Turn( Board board )
     {
@@ -39,7 +106,7 @@ public class Turn
     }
 
     // marks the specified piece to be added during the turn
-    public void AddPiece(Piece piece)
+    public void AddPiece(PieceType piece)
     {
         piecesCreated.Add(piece);
     }
@@ -47,13 +114,13 @@ public class Turn
     // moves piece from startCoor to endCoor
     public void AddMovement(Piece piece, Coor startCoor, Coor endCoor)
     {
-        movements.Add(new Movement(piece, startCoor, endCoor));
+        movements.Add(new PieceMovement(piece, startCoor, endCoor));
     }
 
     // remove all movement requests
     public void IgnoreMovement()
     {
-        movements = new List<Movement>();
+        movements = new List<PieceMovement>();
     }
 
     // does the turn
@@ -65,12 +132,12 @@ public class Turn
             board.RemovePiece(pieceRemoved);
         }
 
-        foreach (Piece pieceCreated in piecesCreated)
+        foreach (PieceType pieceCreated in piecesCreated)
         {
-            board.AddPiece(pieceCreated);
+            pieceCreated.CreateAndAdd();
         }
 
-        foreach( Movement movement in  movements)
+        foreach(PieceMovement movement in  movements)
         {
             // move the moving piece to endCoor
             board.GetPosition(movement.departure).piece = null;
@@ -78,7 +145,7 @@ public class Turn
             board.GetPosition(movement.destination).piece = movement.movingPiece;
             movement.movingPiece.turnCount++;
         }
-
+        
         // add the turn to the board's history
         board.history.Push(this);
 
@@ -99,7 +166,7 @@ public class Turn
         //    remove this from history
         board.history.Pop();
 
-        foreach (Movement movement in movements)
+        foreach (PieceMovement movement in movements)
         {
             // move the moving piece to endCoor
             board.GetPosition(movement.destination).piece = null;
@@ -109,14 +176,13 @@ public class Turn
         }
 
         // remove/create pieces
-        foreach( Piece pieceRemoved in piecesRemoved )
+        foreach (Piece pieceRemoved in piecesRemoved)
         {
             board.AddPiece(pieceRemoved);
         }
-        foreach (Piece pieceCreated in piecesRemoved)
+        foreach (PieceType pieceCreated in piecesCreated)
         {
-            board.RemovePiece(pieceCreated);
-            board.DestroyPiece(pieceCreated);
+            pieceCreated.Uncreate();
         }
 
         // select the previous player

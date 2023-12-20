@@ -36,6 +36,11 @@ public class Coor
     {
         x = xPar; y = yPar;
     }
+    public Coor(Coor coor)
+    {
+        x = coor.x;
+        y = coor.y;
+    }
     public Coor() { }
 
     public override string ToString()
@@ -77,6 +82,9 @@ public class Board : MonoBehaviour
     // player who can move pieces
     public Player playerInControl;
 
+    // pieces that need to be destroyed
+    private List<Piece> piecesToDestroy = new List<Piece>();
+
     // state of the game (GAME_OVER, INVALID, IN_PROGRESS)
     public BoardState state
     {
@@ -106,7 +114,7 @@ public class Board : MonoBehaviour
         // initialize players
         for( int playerID = 0; playerID < GAME_SETTINGS.NUM_PLAYERS; playerID++ )
         {
-            players.Add(new Player(playerID));
+            players.Add(new TesterPlayer(playerID));
         }
 
         // initialize empty position objects
@@ -122,27 +130,27 @@ public class Board : MonoBehaviour
         Player player2 = players[1];
 
         // initialize pieces
+        AddPiece(CreateKing(new Coor(3, 0), player1));
         AddPiece(CreateRook(new Coor(0, 0), player1));
         AddPiece(CreateRook(new Coor(7, 0), player1));
         AddPiece(CreateKnight(new Coor(1, 0), player1));
         AddPiece(CreateKnight(new Coor(6, 0), player1));
         AddPiece(CreateBishop(new Coor(2, 0), player1));
         AddPiece(CreateBishop(new Coor(5, 0), player1));
-        AddPiece(CreateKing(new Coor(3, 0), player1));
         AddPiece(CreateQueen(new Coor(4, 0), player1));
 
+        AddPiece(CreateKing(new Coor(4, 7), player2));
         AddPiece(CreateRook(new Coor(0, 7), player2));
         AddPiece(CreateRook(new Coor(7, 7), player2));
         AddPiece(CreateKnight(new Coor(1, 7), player2));
         AddPiece(CreateKnight(new Coor(6, 7), player2));
         AddPiece(CreateBishop(new Coor(2, 7), player2));
         AddPiece(CreateBishop(new Coor(5, 7), player2));
-        AddPiece(CreateKing(new Coor(4, 7), player2));
         AddPiece(CreateQueen(new Coor(3, 7), player2));
 
-        for( int pawnX = 0; pawnX <= 7; pawnX++ )
+        for ( int pawnX = 0; pawnX < GAME_SETTINGS.BOARD_WIDTH; pawnX++ )
         {
-            AddPiece(CreatePawn(new Coor(pawnX, 1), player1));
+            AddPiece(Create<Pawn>(new Coor(pawnX, 1), player1));
             AddPiece(CreatePawn(new Coor(pawnX, 6), player2));
         }
 
@@ -247,6 +255,13 @@ public class Board : MonoBehaviour
         {
             piece.UpdatePhysical();
         }
+
+        // wait until piece is updated physically to destroy
+        foreach( Piece piece in piecesToDestroy )
+        {
+            _pieces.Remove(piece);
+        }
+        piecesToDestroy = new List<Piece>();
     }
 
     // pass control to the next player
@@ -272,7 +287,7 @@ public class Board : MonoBehaviour
     // switch to the previous player
     public void PrevPlayerTurn()
     {
-        int playerID = playerTurn.id;
+        int playerID = playerTurn.id - 1;
         if (playerID < 0)
         {
             playerID = GAME_SETTINGS.NUM_PLAYERS - 1;
@@ -330,12 +345,19 @@ public class Board : MonoBehaviour
         return CreatePiece(newPieceCoor, owner, piece);
     }
 
+    public Piece Create<PieceType>(Coor newPieceCoor, Player owner)
+                     where PieceType : Piece, new()
+    {
+        Piece piece = new PieceType();
+        return CreatePiece(newPieceCoor, owner, piece);
+    }
+
 
     // destroy the specified the piece
     public void DestroyPiece( Piece piece )
     {
-        GetPosition(piece.coor).piece = null;
-        _pieces.Remove(piece);
+        RemovePiece(piece);
+        piecesToDestroy.Add(piece);
     }
 
     // add the specified piece to the board
@@ -357,4 +379,40 @@ public class Board : MonoBehaviour
         // set to inactive
         piece.isActive = false;
     }
+
+
+
+    //////////////////////////// TesterPlayer //////////////////////////////////
+    // functions to allow 
+    private TesterPlayer testPlayer;
+
+    public void TesterPlayerInitialize( TesterPlayer player )
+    {
+        testPlayer = player;
+    }
+
+    public void TesterPlayerDoTurn()
+    {
+        if (testPlayer.DoTurn())
+        {
+            Invoke("TesterPlayerUndoTurn", 2.0f);
+        }
+        else
+        {
+            testPlayer.OnTurnsEnd();
+        }
+    }
+
+    public void TesterPlayerUndoTurn()
+    {
+        if (testPlayer.UndoTurn())
+        {
+            Invoke("TesterPlayerDoTurn", .25f);
+        }
+        else
+        {
+            testPlayer.OnTurnsEnd();
+        }
+    }
+    //////////////////////////// TesterPlayer //////////////////////////////////
 }
