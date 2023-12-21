@@ -44,6 +44,9 @@ TagManager:
   - name: ChessBoard
     uniqueID: 3228950083
     locked: 0
+  - name: BoardPosition
+    uniqueID: 918026385
+    locked: 0
   - name: Piece
     uniqueID: 726265383
     locked: 0

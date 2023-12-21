@@ -33,4 +33,9 @@ public abstract class Player
 
     // called when given control of the Board
     public abstract void OnControlStart(Board board);
+
+    public virtual void OnSelectCoordinate(Coor coor)
+    {
+        Debug.Log("Clicked " + coor + " not handled by player");
+    }
 }
