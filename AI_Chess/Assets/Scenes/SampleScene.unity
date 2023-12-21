@@ -414,6 +414,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6365878313770349144, guid: e1e7a9eea4615fd489422da511376602, type: 3}
+      propertyPath: positionPrefab
+      value: 
+      objectReference: {fileID: 3090485062043040054, guid: 442f9543c0413f2479dae82e7cb1b9a2, type: 3}
     - target: {fileID: 6586520923576892546, guid: e1e7a9eea4615fd489422da511376602, type: 3}
       propertyPath: m_Name
       value: ChessBoard

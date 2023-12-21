@@ -8,11 +8,6 @@ public enum BoardState
     GAME_OVER, INVALID, IN_PROGRESS
 }
 
-public class Position
-{
-    public Piece piece;
-}
-
 static class GAME_SETTINGS
 {
     public const int NUM_PLAYERS = 2;
@@ -56,6 +51,8 @@ public class Coor
 
 public class Board : MonoBehaviour
 {
+    public GameObject positionPrefab;
+
     // pieces on or off the board
     private List<Piece> _pieces = new List<Piece>();
 
@@ -116,7 +113,8 @@ public class Board : MonoBehaviour
         {
             for( int y = 0; y < GAME_SETTINGS.BOARD_WIDTH; y++ )
             {
-                positions[x, y] = new Position();
+                positions[x, y] = Instantiate<GameObject>(positionPrefab,this.transform).GetComponent<Position>();
+                positions[x, y].Init(this, new Coor(x, y));
             }
         }
 
@@ -124,7 +122,6 @@ public class Board : MonoBehaviour
         Player player2 = players[1];
 
         // initialize pieces
-        /*
         AddPiece(Create<King>(new Coor(3, 0), player1));
         AddPiece(Create<Rook>(new Coor(0, 0), player1));
         AddPiece(Create<Rook>(new Coor(7, 0), player1));
@@ -142,7 +139,6 @@ public class Board : MonoBehaviour
         AddPiece(Create<Bishop>(new Coor(2, 7), player2));
         AddPiece(Create<Bishop>(new Coor(5, 7), player2));
         AddPiece(Create<Queen>(new Coor(3, 7), player2));
-        */
 
         for ( int pawnX = 0; pawnX < GAME_SETTINGS.BOARD_WIDTH; pawnX++ )
         {
@@ -383,4 +379,10 @@ public class Board : MonoBehaviour
         }
     }
     //////////////////////////// TesterPlayer //////////////////////////////////
+
+    // notify player in control when a coordinate is clicked
+    public void OnSelectCoordinate(Coor coor)
+    {
+        playerInControl.OnSelectCoordinate(coor);
+    }
 }
