@@ -20,7 +20,7 @@ public class Coor
     // able to access with values directly
     public int x;
     public int y;
-    public Coor(int xPar,int yPar)
+    public Coor(int xPar, int yPar)
     {
         x = xPar; y = yPar;
     }
@@ -37,15 +37,26 @@ public class Coor
     }
 
     // elementwise addition
-    public static Coor operator+(Coor left, Coor right)
+    public static Coor operator +(Coor left, Coor right)
     {
-        return new Coor( left.x + right.x, left.y + right.y );
+        return new Coor(left.x + right.x, left.y + right.y);
     }
 
     // scalar multiplication
-    public static Coor operator*(Coor left, int right)
+    public static Coor operator *(Coor left, int right)
     {
-        return new Coor(left.x * right, left.y * right );
+        return new Coor(left.x * right, left.y * right);
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        Coor testcoor = obj as Coor;
+        return testcoor.x == x && testcoor.y == y;
+    }
+
+    public override int GetHashCode()
+    {
+        return x + y + x ^ y;
     }
 }
 
@@ -105,7 +116,7 @@ public class Board : MonoBehaviour
         // initialize players
         for( int playerID = 0; playerID < GAME_SETTINGS.NUM_PLAYERS; playerID++ )
         {
-            players.Add(new TesterPlayer(playerID));
+            players.Add(new UserPlayer(playerID));
         }
 
         // initialize empty position objects

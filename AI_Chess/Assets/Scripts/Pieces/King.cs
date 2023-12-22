@@ -74,8 +74,8 @@ public class King : Piece
                     Coor rookEnd = new Coor(kingEnd.x - xDir, kingEnd.y);
 
                     Turn turn = new Turn(board);
-                    turn.AddMovement(rook, rookStart, rookEnd);
                     turn.AddMovement(this, kingStart, kingEnd);
+                    turn.AddMovement(rook, rookStart, rookEnd);
                     turns.Add(turn);
                 }
 
