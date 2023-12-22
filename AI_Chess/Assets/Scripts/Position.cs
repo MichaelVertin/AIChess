@@ -13,7 +13,7 @@ public class Position : MonoBehaviour
         this.board = board;
         this.coor = coor;
         float scale = 1f / (float)GAME_SETTINGS.BOARD_WIDTH;
-        this.transform.localScale = new Vector2(scale, scale);
+        this.transform.localScale = new Vector3(scale, scale, 1);
         float offset = -.5f * (float)GAME_SETTINGS.BOARD_WIDTH + .5f;
         Vector2 relativePosition = new Vector2(this.coor.x, this.coor.y);
         this.transform.position = relativePosition + new Vector2(offset, offset);

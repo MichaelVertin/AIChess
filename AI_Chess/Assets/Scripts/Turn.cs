@@ -9,9 +9,9 @@ using UnityEngine;
 // Calls board.Create when PieceType.create is called
 public abstract class PieceType
 {
-    protected Coor coor;
-    protected Player owner;
-    protected Board board;
+    public readonly Coor coor;
+    public readonly Player owner;
+    public readonly Board board;
     protected Piece piece = null;
 
     public PieceType(Coor coor, Player owner, Board board)
@@ -129,18 +129,22 @@ public class Turn
     public void RemovePiece(Piece piece)
     {
         piecesRemoved.Add(piece);
+        checkForCoordinateIdentifier(piece.coor);
     }
 
     // marks the specified piece to be added during the turn
     public void AddPiece(PieceType piece)
     {
         piecesCreated.Add(piece);
+        checkForCoordinateIdentifier(piece.coor);
     }
 
     // moves piece from startCoor to endCoor
     public void AddMovement(Piece piece, Coor startCoor, Coor endCoor)
     {
         movements.Add(new PieceMovement(board, piece, startCoor, endCoor));
+        checkForCoordinateIdentifier(startCoor);
+        checkForCoordinateIdentifier(endCoor);
     }
 
 
@@ -233,5 +237,37 @@ public class Turn
             return false;
         }
         return true;
+    }
+
+    ///////////////////////// coordinate identifiers ///////////////////////////
+    private Coor _mainStartCoor = null;
+    private Coor _mainEndCoor = null;
+
+    // mainStart/EndCoor are determined by the first 
+    //   two coordinates that are referenced in 
+    //   creation methods
+    public Coor mainStartCoor
+    {  get { return _mainStartCoor; } }
+
+    public Coor mainEndCoor 
+    { get { return _mainEndCoor; } }
+
+
+
+    // checks for testCoor will be used as a main coordiante, 
+    // assigns to mainStartCoor and mainEndCoor as needed
+    private void checkForCoordinateIdentifier( Coor testCoor )
+    {
+        // mainStartCoor will be the first checked coordinate
+        if( _mainStartCoor == null )
+        {
+            _mainStartCoor = testCoor;
+        }
+        // mainEndCoor will be the second checked coordinate
+        else if( _mainEndCoor == null )
+        {
+            _mainEndCoor = testCoor;
+        }
+        // any other coordinate is not a main coordinate
     }
 }
