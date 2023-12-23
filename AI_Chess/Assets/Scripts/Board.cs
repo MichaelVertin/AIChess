@@ -114,10 +114,8 @@ public class Board : MonoBehaviour
     void Start()
     {
         // initialize players
-        for( int playerID = 0; playerID < GAME_SETTINGS.NUM_PLAYERS; playerID++ )
-        {
-            players.Add(new UserPlayer(playerID));
-        }
+        players.Add(new UserPlayer(0));
+        players.Add(new RandomPlayer(1));
 
         // initialize empty position objects
         for( int x = 0; x < GAME_SETTINGS.BOARD_WIDTH; x++ )

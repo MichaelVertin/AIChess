@@ -37,12 +37,12 @@ public class RandomPlayer : Player
                 Turn randomTurn = turns[randomInd];
                 if (randomTurn.DoIfVerified())
                 {
-                    board.Invoke("PassControl", 1f);
+                    board.PassControl();
                     return;
                 }
             }
             num_iter++;
         }
-        board.Invoke("PassControl", 1f);
+        board.PassControl();
     }
 }

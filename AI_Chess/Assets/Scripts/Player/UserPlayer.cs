@@ -30,6 +30,20 @@ public class UserOptionsMap
         }
     }
 
+    public List<Turn> this[Coor start]
+    {
+        get
+        {
+            List<Turn> turns = new List<Turn>();
+            Ensure(start);
+            foreach(KeyValuePair<Coor, List<Turn>> pair in options[start] )
+            {
+                turns.AddRange(pair.Value);
+            }
+            return turns;
+        }
+    }
+
     private void Ensure( Coor start, Coor end )
     {
         Ensure(start);
@@ -61,10 +75,11 @@ public class UserOptionsMap
 public class UserPlayer : Player
 {
     private Board board;
+    private List<Coor> highlightedCoors = new List<Coor>();
     UserOptionsMap options;
 
     // the last selected valid startMainCoor
-    //  - if none, selectedCoor is null
+    //   (if none, selectedCoor is null)
     private Coor selectedCoor = null;
 
     public UserPlayer(int id) : base(id)
@@ -88,6 +103,8 @@ public class UserPlayer : Player
         {
             options.Add(turn);
         }
+
+        Unselect();
     }
 
     // called when turns ended, 
@@ -95,43 +112,137 @@ public class UserPlayer : Player
     public void DoTurn(Turn turn)
     {
         turn.Do();
-        board.UpdatePhysical();
-        board.Invoke("PassControl", 0f);
+        board.PassControl();
     }
 
     public override void OnSelectCoordinate(Coor coor)
     {
-        // check user has already selected a coordinate
+        // first try to select the final coordinate
+        if( SelectFinal(coor) )
+        {
+            return;
+        }
+
+        // if not able to select the final cooordinate, unselect everything
+        Unselect();
+
+        // try to select the start
+        if( SelectStart(coor) )
+        {
+            return;
+        }
+    }
+
+    // unselect the selected coordinate
+    private void Unselect()
+    {
+        selectedCoor = null;
+        unhighlightAll();
+        Debug.Log("Unselected Piece");
+    }
+
+    // select the first main coordinate
+    // returns if the coordinate was successfully selected
+    private bool SelectStart(Coor coor)
+    {
+        // fail if a coordinate has already been selected
         if( selectedCoor != null )
         {
-            List<Turn> possibleTurns = options[selectedCoor, coor];
+            return false;
+        }
 
-            // check for a number of possible turns exist
-            if ( possibleTurns.Count > 0 )
+        List<Turn> turns = options[coor];
+
+        // check the options would allow at least one turn
+        if (turns.Count > 0)
+        {
+            // mark the coordinate as selected
+            selectedCoor = coor;
+            highlightCoor(coor);
+
+            // notify the user that the piece was selected, 
+            //   and display summary of turns
+            Debug.Log("Selected Piece");
+            foreach (Turn turn in turns)
             {
-                if( possibleTurns.Count == 1 )
-                {
-                    Debug.Log("Moved Piece");
-                    DoTurn(possibleTurns[0]);
-                }
-                else
-                {
-                    
-                }
+                Debug.Log(turn.mainStartCoor + " -> " + turn.mainEndCoor);
+                highlightCoor(turn.mainEndCoor);
             }
 
-            // unselect cooordinates
-            selectedCoor = null;
-            Debug.Log("Unselected Piece");
+            return true;
         }
+        return false;
+    }
+
+    // selects the final coordinate and do the corresponding turn
+    // returns false if unable to do the turn
+    private bool SelectFinal(Coor coor)
+    {
+        // fail if a startCoor hasn't been selected
+        if( selectedCoor == null)
+        {
+            return false;
+        }
+
+        List<Turn> turns = options[selectedCoor,coor];
+        
+        // fail if there are no turns
+        if( turns.Count == 0 )
+        {
+            return false;
+        }
+
+        // if there is exactly one turn, 
+        //    do the turn
+        if (turns.Count == 1)
+        {
+            Debug.Log("Moving Piece");
+            DoTurn(turns[0]);
+        }
+        // otherwise if there are multiple turns, 
+        //    have the user make a decision
         else
         {
-            if( options.StartsWith(coor))
+            // for now, mark as an ambigious decision
+            Debug.Log("Ambiguous Decision");
+            return false;
+        }
+
+        return true;
+
+    }
+
+    private void highlightCoor( Coor coor )
+    {
+        Position pos = board.GetPosition( coor );
+        if( pos != null )
+        {
+            pos.AddColor(new Color(1f, 1f, 1f));
+            highlightedCoors.Add(coor);
+        }
+    }
+
+    private void unhighlightCoor( Coor coor )
+    {
+        Position pos = board.GetPosition(coor);
+        if (pos != null)
+        {
+            pos.RemoveColor(new Color(1f, 1f, 1f));
+            highlightedCoors.Remove(coor);
+        }
+    }
+
+    private void unhighlightAll()
+    {
+        foreach(Coor coor in highlightedCoors)
+        {
+            Position pos = board.GetPosition(coor);
+            if (pos != null)
             {
-                Debug.Log("Selected Piece");
-                selectedCoor = coor;
+                pos.RemoveColor(new Color(1f, 1f, 1f));
             }
         }
+        highlightedCoors = new List<Coor>();
     }
 }
 
