@@ -87,8 +87,13 @@ public class Pawn : Piece
                 foreach( PieceType createdPiece in createdPieces )
                 {
                     turn = new Turn(board);
-                    turn.AddPiece(createdPiece);
                     turn.RemovePiece(this);
+                    turn.AddPiece(createdPiece);
+                    Piece enemy = board.GetEnemy(endCoor);
+                    if (board.GetEnemy(endCoor) != null)
+                    {
+                        turn.RemovePiece(enemy);
+                    }
                     turns.Add(turn);
                 }
             }
@@ -97,5 +102,9 @@ public class Pawn : Piece
         }
 
         return false;
+    }
+    public override string PieceType()
+    {
+        return "pawn";
     }
 }

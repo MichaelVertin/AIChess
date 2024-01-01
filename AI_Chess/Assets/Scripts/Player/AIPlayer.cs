@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RandomPlayer : Player
+public class AIPlayer : Player
 {
-    public RandomPlayer(int id) : base(id)
+    public AIPlayer(int id) : base(id)
     {
 
     }
@@ -12,6 +12,12 @@ public class RandomPlayer : Player
     // called when given control of the Board
     public override void OnControlStart(Board board)
     {
+        if( board.GameOver )
+        {
+            board.PassControl();
+            return;
+        }
+
         int num_iter = 0;
         // try to make a move 100 times
         while (num_iter < 100)

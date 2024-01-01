@@ -110,6 +110,7 @@ public class PieceMovement
 public class Turn
 {
     private Board board;
+    private Turn prevTurn;
 
     // list of movements
     private List<PieceMovement> movements = new List<PieceMovement>();
@@ -123,6 +124,14 @@ public class Turn
     public Turn( Board board )
     {
         this.board = board;
+        if(this.board.history.Count == 0)
+        {
+            prevTurn = null;
+        }
+        else
+        {
+            prevTurn = this.board.history.Peek();
+        }
     }
 
     // marks the specified piece to be removed during the turn
@@ -154,11 +163,20 @@ public class Turn
     //       (may make the king vulnerable)
     public void Do()
     {
+        if(this.board.history.Count != 0)
+        {
+            if (!ReferenceEquals(this.board.history.Peek(), prevTurn))
+            {
+                Debug.LogError("WARNING: another turn was done since this turn was created");
+            }
+        }
+
         // remove/create pieces if applicable
-        foreach( Piece pieceRemoved in piecesRemoved )
+        foreach ( Piece pieceRemoved in piecesRemoved )
         {
             board.RemovePiece(pieceRemoved);
         }
+
 
         foreach (PieceType pieceCreated in piecesCreated)
         {
@@ -170,7 +188,7 @@ public class Turn
         {
             movement.Do();
         }
-        
+
         // add the turn to the board's history
         board.history.Push(this);
 
@@ -198,15 +216,14 @@ public class Turn
         }
 
         // remove/create pieces
-        foreach (Piece pieceRemoved in piecesRemoved)
-        {
-            board.AddPiece(pieceRemoved);
-        }
         foreach (PieceType pieceCreated in piecesCreated)
         {
             pieceCreated.Uncreate();
         }
-
+        foreach (Piece pieceRemoved in piecesRemoved)
+        {
+            board.AddPiece(pieceRemoved);
+        }
         // select the previous player
         board.PrevPlayerTurn();
     }
@@ -218,7 +235,7 @@ public class Turn
         // do the turn, check for a valid state, undo the turn
         bool isValid;
         Do();
-        isValid = board.state != BoardState.INVALID;
+        isValid = board.ValidState;
         Undo();
         return isValid;
     }
@@ -231,7 +248,7 @@ public class Turn
         Do();
 
         // undo the turn if invalid
-        if( board.state == BoardState.INVALID )
+        if (!board.ValidState )
         {
             Undo();
             return false;
@@ -269,5 +286,10 @@ public class Turn
             _mainEndCoor = testCoor;
         }
         // any other coordinate is not a main coordinate
+    }
+
+    public override string ToString()
+    {
+        return mainStartCoor + " -> " + mainEndCoor;
     }
 }

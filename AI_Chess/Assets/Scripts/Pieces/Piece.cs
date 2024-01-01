@@ -52,6 +52,11 @@ public abstract class Piece
     // method where subclass will inform Piece how it works
     public abstract List<Turn> GetPieceTurns();
 
+    public virtual bool isKing
+    {
+        get { return false; }
+    }
+
     // return legal turns that involve this
     public List<Turn> GetLegalTurns()
     {
@@ -66,7 +71,7 @@ public abstract class Piece
             }
         }
         // return all available turns
-        return GetTurns();
+        return turns;
     }
 
     // update physical piece seen by user
@@ -173,5 +178,11 @@ public abstract class Piece
         }
         return false;
     }
+
+    public override string ToString()
+    {
+        return "Active " + PieceType() + " at " + coor.ToString();
+    }
+    public abstract string PieceType();
 }
 

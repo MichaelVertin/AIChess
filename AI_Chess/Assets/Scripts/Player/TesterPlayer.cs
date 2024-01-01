@@ -7,12 +7,12 @@ using UnityEngine;
 /*
  * Player for testing moves
  * Does and undoes every possible move, 
- *   when done, passes control to the nex
-*/
+ *   when done, passes control to the next player
+ */
 public class TesterPlayer : Player
 {
-    Board board;
-    private List<Turn> turns; // contains list of possible turns
+    private Board board;
+    private List<Turn> turns; // contains list of possible moves
     private int turnIndex; // used to iterate
 
     public TesterPlayer(int id) : base(id)

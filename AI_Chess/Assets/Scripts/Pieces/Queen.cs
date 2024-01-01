@@ -29,4 +29,10 @@ public class Queen : Piece
         return GetTurnsByLinearMovements(this.coor, directions,
                                          ON_CONTACT_ENEMY.REMOVE_ENEMY);
     }
+
+    public override string PieceType()
+    {
+        return "queen";
+    }
+
 }
