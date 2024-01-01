@@ -1,0 +1,17 @@
+max value:
+ - checkmate
+
+large value:
+ - maximize friendly pieces
+ - minimize enemy pieces
+ - check
+
+small value:
+ - minimize enemy options
+ - maximize friendly options
+ - protection of critical points
+    - checkable
+    - enemy/friendly pieces
+
+
+
