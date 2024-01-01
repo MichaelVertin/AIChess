@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 
@@ -76,7 +77,8 @@ public class UserPlayer : Player
 {
     private Board board;
     private List<Coor> highlightedCoors = new List<Coor>();
-    UserOptionsMap options;
+    private UserOptionsMap options;
+    private PieceMenu menu = null;
 
     // the last selected valid startMainCoor
     //   (if none, selectedCoor is null)
@@ -111,6 +113,7 @@ public class UserPlayer : Player
     // does a random turn before passing control
     public void DoTurn(Turn turn)
     {
+        Unselect();
         turn.Do();
         board.PassControl();
     }
@@ -137,8 +140,11 @@ public class UserPlayer : Player
     private void Unselect()
     {
         selectedCoor = null;
+        if( menu != null )
+        {
+            menu.Destroy();
+        }
         unhighlightAll();
-        Debug.Log("Unselected Piece");
     }
 
     // select the first main coordinate
@@ -162,10 +168,9 @@ public class UserPlayer : Player
 
             // notify the user that the piece was selected, 
             //   and display summary of turns
-            Debug.Log("Selected Piece");
             foreach (Turn turn in turns)
             {
-                Debug.Log(turn.mainStartCoor + " -> " + turn.mainEndCoor);
+//                Debug.Log(turn.mainStartCoor + " -> " + turn.mainEndCoor);
                 highlightCoor(turn.mainEndCoor);
             }
 
@@ -196,15 +201,22 @@ public class UserPlayer : Player
         //    do the turn
         if (turns.Count == 1)
         {
-            Debug.Log("Moving Piece");
             DoTurn(turns[0]);
         }
         // otherwise if there are multiple turns, 
         //    have the user make a decision
         else
         {
-            // for now, mark as an ambigious decision
-            Debug.Log("Ambiguous Decision");
+            // create the menu, allow user to select turns
+            if( menu == null )
+            {
+                menu = board.InstantiatePieceMenu();
+                menu.Init(turns, this);
+                return true;
+            }
+
+            // this code is ran when a user selects the final coordinate of 
+            // promotion when that coordinate has already been selected
             return false;
         }
 
@@ -212,6 +224,7 @@ public class UserPlayer : Player
 
     }
 
+    // highlights the specified coordinate
     private void highlightCoor( Coor coor )
     {
         Position pos = board.GetPosition( coor );
@@ -222,16 +235,7 @@ public class UserPlayer : Player
         }
     }
 
-    private void unhighlightCoor( Coor coor )
-    {
-        Position pos = board.GetPosition(coor);
-        if (pos != null)
-        {
-            pos.RemoveColor(new Color(1f, 1f, 1f));
-            highlightedCoors.Remove(coor);
-        }
-    }
-
+    // unhightlights all specified coordinates
     private void unhighlightAll()
     {
         foreach(Coor coor in highlightedCoors)
@@ -243,6 +247,13 @@ public class UserPlayer : Player
             }
         }
         highlightedCoors = new List<Coor>();
+    }
+
+    // called when a piece option is selected from menu
+    public void OnPieceOptionSelect(Turn turn)
+    {
+        Unselect();
+        DoTurn(turn);
     }
 }
 

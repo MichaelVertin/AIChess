@@ -50,3 +50,9 @@ TagManager:
   - name: Piece
     uniqueID: 726265383
     locked: 0
+  - name: OptionsMenu
+    uniqueID: 3861643093
+    locked: 0
+  - name: OptionsPiece
+    uniqueID: 490920571
+    locked: 0

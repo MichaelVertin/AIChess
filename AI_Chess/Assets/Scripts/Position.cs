@@ -1,10 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Position : MonoBehaviour
 {
-    public Piece piece;
+    private Piece _piece;
+
+    public Piece piece
+    {
+        get
+        {
+            return _piece;
+        }
+        set
+        {
+            if( _piece != null && value != null )
+            {
+                Debug.LogError("ERROR: tried to store " + value + " into a position already containing " + _piece);
+            }
+            _piece = value;
+        }
+    }
     public Coor coor;
     public Board board;
 

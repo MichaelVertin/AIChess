@@ -40,4 +40,10 @@ public class Knight : Piece
         return turns;
     }
 
+    public override string PieceType()
+    {
+        return "knight";
+    }
+
+
 }

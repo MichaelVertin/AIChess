@@ -20,6 +20,12 @@ public class StaticPrefabs : MonoBehaviour
     public static List<GameObject> KING_PREFAB = new List<GameObject>();
     public static List<GameObject> QUEEN_PREFAB = new List<GameObject>();
 
+    public static GameObject PIECE_OPTIONS_PREFAB;
+    public static GameObject QUEEN_OPTION_PREFAB;
+    public static GameObject ROOK_OPTION_PREFAB;
+    public static GameObject KNIGHT_OPTION_PREFAB;
+    public static GameObject BISHOP_OPTION_PREFAB;
+
     // GameObjects to assign from inspector
     public GameObject BLACK_PAWN_PREFAB_INSPECTOR = null;
     public GameObject BLACK_ROOK_PREFAB_INSPECTOR = null;
@@ -33,6 +39,13 @@ public class StaticPrefabs : MonoBehaviour
     public GameObject WHITE_BISHOP_PREFAB_INSPECTOR = null;
     public GameObject WHITE_KING_PREFAB_INSPECTOR = null;
     public GameObject WHITE_QUEEN_PREFAB_INSPECTOR = null;
+
+    public GameObject PIECE_OPTIONS_PREFAB_INSPECTOR;
+    public GameObject QUEEN_OPTION_PREFAB_INSPECTOR;
+    public GameObject ROOK_OPTION_PREFAB_INSPECTOR;
+    public GameObject KNIGHT_OPTION_PREFAB_INSPECTOR;
+    public GameObject BISHOP_OPTION_PREFAB_INSPECTOR;
+
 
 
     // Set all static values from non-static values on Awake
@@ -50,5 +63,11 @@ public class StaticPrefabs : MonoBehaviour
         QUEEN_PREFAB.Add(BLACK_QUEEN_PREFAB_INSPECTOR);
         ROOK_PREFAB.Add(WHITE_ROOK_PREFAB_INSPECTOR);
         ROOK_PREFAB.Add(BLACK_ROOK_PREFAB_INSPECTOR);
+
+        PIECE_OPTIONS_PREFAB = PIECE_OPTIONS_PREFAB_INSPECTOR;
+        QUEEN_OPTION_PREFAB = QUEEN_OPTION_PREFAB_INSPECTOR;
+        KNIGHT_OPTION_PREFAB = KNIGHT_OPTION_PREFAB_INSPECTOR;
+        BISHOP_OPTION_PREFAB = BISHOP_OPTION_PREFAB_INSPECTOR;
+        ROOK_OPTION_PREFAB = ROOK_OPTION_PREFAB_INSPECTOR;
     }
 }

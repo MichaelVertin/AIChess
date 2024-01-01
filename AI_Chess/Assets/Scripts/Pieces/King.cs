@@ -15,6 +15,14 @@ public class King : Piece
         }
     }
 
+    public override bool isKing
+    {
+        get
+        {
+            return true;
+        }
+    }
+
 
     public override List<Turn> GetPieceTurns()
     {
@@ -84,5 +92,11 @@ public class King : Piece
 
         return turns;
     }
+
+    public override string PieceType()
+    {
+        return "king";
+    }
+
 
 }

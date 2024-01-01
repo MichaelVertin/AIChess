@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-
-
-public enum BoardState
-{
-    GAME_OVER, INVALID, IN_PROGRESS
-}
 
 static class GAME_SETTINGS
 {
@@ -86,11 +81,6 @@ public class Board : MonoBehaviour
     // pieces that need to be destroyed
     private List<Piece> piecesToDestroy = new List<Piece>();
 
-    // state of the game (GAME_OVER, INVALID, IN_PROGRESS)
-    public BoardState state
-    {
-        get { return BoardState.IN_PROGRESS; }
-    }
 
     // pieces that are on the board
     public List<Piece> pieces
@@ -115,7 +105,7 @@ public class Board : MonoBehaviour
     {
         // initialize players
         players.Add(new UserPlayer(0));
-        players.Add(new RandomPlayer(1));
+        players.Add(new AIPlayer(1));
 
         // initialize empty position objects
         for( int x = 0; x < GAME_SETTINGS.BOARD_WIDTH; x++ )
@@ -356,7 +346,7 @@ public class Board : MonoBehaviour
 
 
     //////////////////////////// TesterPlayer //////////////////////////////////
-    // functions to allow 
+    // functions to use invoke
     private TesterPlayer testPlayer;
 
     public void TesterPlayerInitialize( TesterPlayer player )
@@ -393,5 +383,100 @@ public class Board : MonoBehaviour
     public void OnSelectCoordinate(Coor coor)
     {
         playerInControl.OnSelectCoordinate(coor);
+    }
+
+    public List<Turn> GetLegalTurns()
+    {
+        List<Turn> turns = new List<Turn>();
+        foreach( Piece piece in pieces )
+        {
+            turns.AddRange(piece.GetLegalTurns());
+        }
+        return turns;
+    }
+
+    public List<Turn> GetTurns()
+    {
+        List<Turn> turns = new List<Turn>();
+        foreach (Piece piece in pieces)
+        {
+            turns.AddRange(piece.GetTurns());
+        }
+        return turns;
+    }
+
+
+    ////////////////////////////// Board State /////////////////////////////////
+    
+    // return if the game is over
+    public bool GameOver
+    {
+        get
+        {
+            return GetLegalTurns().Count == 0;
+        }
+    }
+
+    // returns if any king can be taken
+    public bool ValidState
+    {
+        get
+        {
+            // not two kings on the board: invalid state
+            foreach (Turn turn in GetTurns())
+            {
+                turn.Do();
+                int kingCount = 0;
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.isKing)
+                    {
+                        kingCount++;
+                    }
+                }
+                turn.Undo();
+                if (kingCount < GAME_SETTINGS.NUM_PLAYERS)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    // undoes at least one turn, ending on the controller's last turn
+    // after turns are done, signals the start of that player's turn
+    public void UndoButton()
+    {
+        if( history.Count > 0 )
+        {
+            history.Peek().Undo();
+            while ( history.Count > 0 && 
+                    !ReferenceEquals( playerInControl, playerTurn)
+                  )
+            {
+                history.Peek().Undo();
+            }
+        }
+
+        UpdatePhysical();
+        playerInControl.OnControlStart(this);
+    }
+
+    // creates a piece menu
+    public PieceMenu InstantiatePieceMenu()
+    {
+        PieceMenu menu = Instantiate<GameObject>(StaticPrefabs.PIECE_OPTIONS_PREFAB, this.transform).GetComponent<PieceMenu>();
+        return menu;
+    }
+
+    public override string ToString()
+    {
+        string str = "Board Display:\n";
+        foreach( Piece piece in pieces )
+        {
+            str += piece.ToString() + ";\n";
+        }
+        return str;
     }
 }
