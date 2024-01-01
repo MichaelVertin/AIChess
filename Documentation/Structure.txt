@@ -17,9 +17,10 @@ Board.pieces      | R--   | R--   | RW-  | R--    |
 Board.history     | ---   | ---   | RW-  | ---    |
 Board.playerTurn  | ---   | R--   | -W-  | ---    |
 Board.playerInC.. | ---   | ---   | ---  | RW-    |
-Board.state       | -W-   | ---   | R--  | ---    |
-Board.positions   | ---   | R--   | ---  | ---    |
+Board.state       | RW-   | ---   | R--  | ---    |
+Board.positions   | ---   | R--   | ---  | R--    |
 Board.physical    | ---   | ---   | ---  | --E    |
+Board.turns       | -W-   | ---   | ---  | R--    |
 
 Piece.physical    | --E   | RW-   | ---  | ---    |
 Piece.turnCount   | ---   | ---   | -W-  | ---    |
@@ -49,7 +50,7 @@ Board.playerInControl
    W: PassControl()
 
 Board.state
-   R: state
+   R: ValidState(), GameOver
 
 Board.positions
    R: GetPosition(), IsEmpty()
@@ -57,6 +58,9 @@ Board.positions
 Board.physical
    R: transform
    E: UpdatePhsyical()
+
+Board.turns
+   R: GetLegalTurns, GetTurns
 
 
 Piece.physical
@@ -97,11 +101,13 @@ Board:
     playerInControl:
      - player who controls turns
     state:
-     - state of board (IN_PROGRESS,GAME_OVER,INVALID)
+     - state of board
     positions:
      - locations on the board that contain up to one piece
     physical:
      - board and pieces seen by user
+    turns:
+     - possible turns for the player turn
 
 Piece:
     physical:
