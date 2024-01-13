@@ -38,10 +38,15 @@ public abstract class Piece
     /////////////////////// accessing turns of piece ///////////////////////////
     // return all turns that involve this
     // NOTE: some turns may not be legal
-    public List<Turn> GetTurns()
+    public List<Turn> GetTurns(bool requirePlayerTurn = true)
     {
         // fail if not active or not owner's turn
-        if (!isActive || !ReferenceEquals(board.playerTurn, owner))
+        if ( !isActive )
+        {
+            return new List<Turn>();
+        }
+
+        if (requirePlayerTurn && !ReferenceEquals(board.playerTurn, owner))
         {
             return new List<Turn>();
         }
@@ -58,12 +63,12 @@ public abstract class Piece
     }
 
     // return legal turns that involve this
-    public List<Turn> GetLegalTurns()
+    public List<Turn> GetLegalTurns(bool requirePlayerTurn = true)
     {
         List<Turn> turns = new List<Turn>();
 
         // only select turns that can be verified
-        foreach( Turn turn in GetTurns() )
+        foreach( Turn turn in GetTurns(requirePlayerTurn) )
         {
             if( turn.Verify() )
             {
