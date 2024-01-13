@@ -2,16 +2,55 @@ max value:
  - checkmate
 
 large value:
- - maximize friendly pieces
- - minimize enemy pieces
- - check
+ - maximize friendly pieces      // pieces
+ - minimize enemy pieces         // pieces
+ - check                         // options
 
 small value:
- - minimize enemy options
- - maximize friendly options
- - protection of critical points
-    - checkable
-    - enemy/friendly pieces
+ - minimize enemy options        // options
+ - maximize friendly options     // options
+ - protection of critical points // protection
+
+
+
+
+// how many options friends have compared to enemies
+options:
+  options_score = 0
+  foreach enemy_piece:
+    options_score -= enemy_piece.turns.count
+  foreach friendly_piece:
+    options_score += friendly_piece.turns.count
+  return options_score 
+
+// how many critical positions are protected by friends compared to enemies
+// TODO: overprotection of a position is not worth as much
+protection:
+  list<positions> protection_map // structure for all positions
+
+  foreach( piece in pieces ):
+    foreach( turn in piece.turns ):
+      if piece is enemy:
+        protection_value = -1
+      else piece is friend:
+        protection_value = +1
+      protection_map[ turn.end_position ] += protection_value
+
+  protection_score = 0
+  foreach( position,protection_value in protection_map ):
+    if position contains a piece:
+      protection_score += protection_value
+  return protection_score
+
+// how many friends are there than enemies
+pieces:
+  piece_score = 0
+  foreach enemy_piece in pieces:
+    piece_score -= enemy_piece.score
+  foreach friendly_piece in pieces:
+    piece_score += friendly_piece.score
+
+
 
 
 
