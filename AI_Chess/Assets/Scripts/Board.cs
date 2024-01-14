@@ -78,10 +78,6 @@ public class Board : MonoBehaviour
     // player who can move pieces
     public Player playerInControl;
 
-    // pieces that need to be destroyed
-    private List<Piece> piecesToDestroy = new List<Piece>();
-
-
     // pieces that are on the board
     public List<Piece> pieces
     {
@@ -90,7 +86,7 @@ public class Board : MonoBehaviour
             List<Piece> pieces = new List<Piece>();
             foreach( Piece piece in this._pieces )
             {
-                if( piece.isActive )
+                if (piece.isActive)
                 {
                     pieces.Add(piece);
                 }
@@ -142,7 +138,7 @@ public class Board : MonoBehaviour
         for ( int pawnX = 0; pawnX < GAME_SETTINGS.BOARD_WIDTH; pawnX++ )
         {
             AddPiece(Create<Pawn>(new Coor(pawnX, 1), player1));
-            AddPiece(Create<Pawn>(new Coor(pawnX, 6), player2));
+            AddPiece(Create<Pawn>(new Coor(pawnX, 6), player1));
         }
 
         // set player values
@@ -246,17 +242,10 @@ public class Board : MonoBehaviour
     public void UpdatePhysical()
     {
         // update all pieces in the board (include inactive)
-        foreach( Piece piece in _pieces )
+        foreach ( Piece piece in _pieces )
         {
             piece.UpdatePhysical();
         }
-
-        // wait until piece is updated physically to destroy
-        foreach( Piece piece in piecesToDestroy )
-        {
-            _pieces.Remove(piece);
-        }
-        piecesToDestroy = new List<Piece>();
     }
 
     // pass control to the next player
@@ -299,7 +288,8 @@ public class Board : MonoBehaviour
 
         // add to the list of pieces, start inactive
         _pieces.Add(piece);
-        piece.isActive = false;
+        piece.isActive = false; // TODO: keeps piece in pieces, uses isActive to determine if still active
+                                //       want to remove isActive status, handle in history
 
         return piece;
     }
@@ -320,7 +310,8 @@ public class Board : MonoBehaviour
     public void DestroyPiece( Piece piece )
     {
         RemovePiece(piece);
-        piecesToDestroy.Add(piece);
+        _pieces.Remove(piece);
+        piece.UpdatePhysical();
     }
 
     // add the specified piece to the board
@@ -343,42 +334,6 @@ public class Board : MonoBehaviour
         piece.isActive = false;
     }
 
-
-
-    //////////////////////////// TesterPlayer //////////////////////////////////
-    // functions to use invoke
-    private TesterPlayer testPlayer;
-
-    public void TesterPlayerInitialize( TesterPlayer player )
-    {
-        testPlayer = player;
-    }
-
-    public void TesterPlayerDoTurn()
-    {
-        if (testPlayer.DoTurn())
-        {
-            Invoke("TesterPlayerUndoTurn", 0.1f);
-        }
-        else
-        {
-            testPlayer.OnTurnsEnd();
-        }
-    }
-
-    public void TesterPlayerUndoTurn()
-    {
-        if (testPlayer.UndoTurn())
-        {
-            Invoke("TesterPlayerDoTurn", .01f);
-        }
-        else
-        {
-            testPlayer.OnTurnsEnd();
-        }
-    }
-    //////////////////////////// TesterPlayer //////////////////////////////////
-
     // notify player in control when a coordinate is clicked
     public void OnSelectCoordinate(Coor coor)
     {
@@ -388,7 +343,7 @@ public class Board : MonoBehaviour
     public List<Turn> GetLegalTurns()
     {
         List<Turn> turns = new List<Turn>();
-        foreach( Piece piece in pieces )
+        foreach (Piece piece in pieces)
         {
             turns.AddRange(piece.GetLegalTurns());
         }
