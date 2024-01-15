@@ -10,10 +10,12 @@ public abstract class Player
     public Coor direction;
     public int promotionY;
     public int baseY;
+    protected Board board;
 
-    public Player( int id )
+    public Player( int id, Board board )
     {
         this.id = id;
+        this.board = board;
 
         // first player moves forward
         if( id == 0 )
@@ -32,7 +34,7 @@ public abstract class Player
     }
 
     // called when given control of the Board
-    public abstract void OnControlStart(Board board);
+    public abstract void OnControlStart();
 
     public virtual void OnSelectCoordinate(Coor coor)
     {

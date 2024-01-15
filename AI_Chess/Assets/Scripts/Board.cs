@@ -100,8 +100,8 @@ public class Board : MonoBehaviour
     void Start()
     {
         // initialize players
-        players.Add(new UserPlayer(0));
-        players.Add(new AIPlayer(1));
+        players.Add(new UserPlayer(0, this));
+        players.Add(new AIPlayer(1, this));
 
         // initialize empty position objects
         for( int x = 0; x < GAME_SETTINGS.BOARD_WIDTH; x++ )
@@ -138,7 +138,7 @@ public class Board : MonoBehaviour
         for ( int pawnX = 0; pawnX < GAME_SETTINGS.BOARD_WIDTH; pawnX++ )
         {
             AddPiece(Create<Pawn>(new Coor(pawnX, 1), player1));
-            AddPiece(Create<Pawn>(new Coor(pawnX, 6), player1));
+            AddPiece(Create<Pawn>(new Coor(pawnX, 6), player2));
         }
 
         // set player values
@@ -147,7 +147,7 @@ public class Board : MonoBehaviour
         UpdatePhysical();
 
         // give control to the first player
-        playerTurn.OnControlStart(this);
+        playerTurn.OnControlStart();
     }
 
 
@@ -258,7 +258,7 @@ public class Board : MonoBehaviour
         playerInControl = players[(playerInControl.id + 1) % GAME_SETTINGS.NUM_PLAYERS];
 
         // notify the player they are in control
-        players[playerInControl.id].OnControlStart(this);
+        players[playerInControl.id].OnControlStart();
     }
 
     // switch to the next player
@@ -415,7 +415,7 @@ public class Board : MonoBehaviour
         }
 
         UpdatePhysical();
-        playerInControl.OnControlStart(this);
+        playerInControl.OnControlStart();
     }
 
     // creates a piece menu
