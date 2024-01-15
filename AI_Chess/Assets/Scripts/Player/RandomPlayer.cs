@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class RandomPlayer : Player
 {
-    public RandomPlayer(int id) : base(id)
+    public RandomPlayer(int id, Board board) : base(id, board)
     {
 
     }
 
     // called when given control of the Board
-    public override void OnControlStart(Board board)
+    public override void OnControlStart()
     {
         int num_iter = 0;
         // try to make a move 100 times

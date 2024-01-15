@@ -75,7 +75,6 @@ public class UserOptionsMap
 
 public class UserPlayer : Player
 {
-    private Board board;
     private List<Coor> highlightedCoors = new List<Coor>();
     private UserOptionsMap options;
     private PieceMenu menu = null;
@@ -84,15 +83,14 @@ public class UserPlayer : Player
     //   (if none, selectedCoor is null)
     private Coor selectedCoor = null;
 
-    public UserPlayer(int id) : base(id)
+    public UserPlayer(int id, Board board) : base(id, board)
     {
         
     }
 
     // called when given control of the Board
-    public override void OnControlStart(Board board)
+    public override void OnControlStart()
     {
-        this.board = board;
         List<Turn> turns = new List<Turn>();
         foreach (Piece piece in board.pieces)
         {
@@ -170,7 +168,6 @@ public class UserPlayer : Player
             //   and display summary of turns
             foreach (Turn turn in turns)
             {
-//                Debug.Log(turn.mainStartCoor + " -> " + turn.mainEndCoor);
                 highlightCoor(turn.mainEndCoor);
             }
 

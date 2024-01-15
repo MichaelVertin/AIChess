@@ -4,60 +4,69 @@ using UnityEngine;
 
 public class AIPlayer : Player
 {
-    public AIPlayer(int id) : base(id)
+    public AIPlayer(int id, Board board) : base(id, board)
     {
 
     }
 
     // called when given control of the Board
-    public override void OnControlStart(Board board)
+    public override void OnControlStart()
     {
-        if (board.GameOver)
+        Turn bestTurn = FindBestTurn();
+
+        if( bestTurn != null )
         {
-            board.PassControl();
-            return;
+            bestTurn.Do();
+        }
+        else
+        {
+            Debug.Log("Unable to find a turn");
         }
 
+        // do the best turn, pass control to the next player
+        board.PassControl();
+    }
+
+    public Turn FindBestTurn()
+    {
         // test all legal turns
         List<Turn> turns = board.GetLegalTurns();
 
         // identify the best score and corresponding turn
         float maxScore = Mathf.NegativeInfinity;
         Turn bestTurn = null;
-        foreach( Turn turn in turns )
+        foreach (Turn turn in turns)
         {
-            // do the turn
-            turn.Do();
-
             // select the new turn if better than the previous best
-            float turnScore = Score(board);
-            if( turnScore > maxScore)
+            float turnScore = ScoreTurn(turn);
+            if (turnScore > maxScore)
             {
                 bestTurn = turn;
                 maxScore = turnScore;
             }
-
-            // undo the turn
-            turn.Undo();
         }
 
-        if( bestTurn == null )
-        {
-            Debug.Log("Unable to find a turn");
-            return;
-        }
+        return bestTurn;
+    }
 
-        // do the best turn, pass control to the next player
-        bestTurn.Do();
-        board.PassControl();
+    public float ScoreTurn(Turn turn)
+    {
+        // do the turn
+        turn.Do();
+
+        // select the new turn if better than the previous best
+        float score = ScoreCurrentState();
+
+        // undo the turn
+        turn.Undo();
+
+        // return resulting score
+        return score;
     }
 
 
-
-
-
     // basic score
-    public float Score(Board board)
+    public float ScoreCurrentState()
     {
         Dictionary<Coor, float> protectionMap = new Dictionary<Coor, float>();
 
