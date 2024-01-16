@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class Queen : Piece
 {
+    // value of the piece (for AIPlayer)
+    public override float Value
+    {
+        get
+        {
+            return 9;
+        }
+    }
+
     // prefab to create physicalGO
     public override GameObject physicalPrefab
     {

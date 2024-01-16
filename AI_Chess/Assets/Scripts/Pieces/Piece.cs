@@ -25,6 +25,11 @@ public abstract class Piece
         get;
     }
 
+    public abstract float Value
+    {
+        get;
+    }
+
     public void Init( Board board, Coor coor, Player owner )
     {
         this.board = board;
