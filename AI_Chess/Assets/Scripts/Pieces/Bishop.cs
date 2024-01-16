@@ -6,6 +6,15 @@ using UnityEngine;
 
 public class Bishop : Piece
 {
+    // value of the piece (for AIPlayer)
+    public override float Value
+    {
+        get
+        {
+            return 3;
+        }
+    }
+
     // prefab to create physicalGO
     public override GameObject physicalPrefab
     {
