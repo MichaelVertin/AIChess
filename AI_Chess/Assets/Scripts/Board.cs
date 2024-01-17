@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Threading;
 
 static class GAME_SETTINGS
 {
@@ -78,6 +79,9 @@ public class Board : MonoBehaviour
     // player who can move pieces
     public Player playerInControl;
 
+    // variable to track when player is doing turn from thread
+    public bool playerDoingTurn = false;
+
     // pieces that are on the board
     public List<Piece> pieces
     {
@@ -145,9 +149,23 @@ public class Board : MonoBehaviour
         playerTurn = players[0];
         playerInControl = players[0];
         UpdatePhysical();
+    }
 
-        // give control to the first player
-        playerTurn.OnControlStart();
+    public void Update()
+    {
+        // do the next player's turn if not already doing one
+        if( !playerDoingTurn )
+        {
+            // update the board before player's turn starts
+            UpdatePhysical();
+
+            // mark the player doing their turn, 
+            // create thread to do the players turn
+            playerDoingTurn = true;
+            Thread thread = new Thread(playerTurn.OnControlStart);
+            thread.Start();
+            //playerTurn.OnControlStart();
+        }
     }
 
 
@@ -251,14 +269,11 @@ public class Board : MonoBehaviour
     // pass control to the next player
     public void PassControl()
     {
-        // update the physical board for the player to observe
-        UpdatePhysical();
-
         // identify the next player in control
         playerInControl = players[(playerInControl.id + 1) % GAME_SETTINGS.NUM_PLAYERS];
 
-        // notify the player they are in control
-        players[playerInControl.id].OnControlStart();
+        // notify the booard the noone is in control
+        playerDoingTurn = false;
     }
 
     // switch to the next player
@@ -403,6 +418,12 @@ public class Board : MonoBehaviour
     // after turns are done, signals the start of that player's turn
     public void UndoButton()
     {
+        if(!ReferenceEquals(playerInControl, playerTurn))
+        {
+            Debug.Log("Attempted to Undo when not in control");
+            return;
+        }
+
         if( history.Count > 0 )
         {
             history.Peek().Undo();

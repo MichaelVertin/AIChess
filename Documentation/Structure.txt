@@ -21,6 +21,7 @@ Board.state       | RW-   | ---   | R--  | ---    |
 Board.positions   | ---   | R--   | ---  | R--    |
 Board.physical    | ---   | ---   | ---  | --E    |
 Board.turns       | -W-   | ---   | ---  | R--    |
+board.playerDoi.. | RW-   | ---   | ---  | RW-    |
 
 Piece.physical    | --E   | RW-   | ---  | ---    |
 Piece.turnCount   | ---   | ---   | -W-  | ---    |
@@ -85,6 +86,31 @@ Turn.*
 Player.*
    R/W: id, direction, promotionY, baseY
    E: OnControlStart()
+
+
+////////////////// threading ////////////////////
+PlayerDoingTurn needs to be set before the thread
+    is initialized, and can't be reset before threading
+    operations are performed
+The board cannot be modified from outside the thread
+    when PlayerDoingTurn is true
+
+board.Update // Unity routine
+ - if not PlayerDoingTurn
+    - board.StartTurn
+
+board.StartTurn // Unity routine
+ - update the physical board
+ - sets PlayerDoingTurn to true
+ - creates a thread for next player's OnControlStart
+ -   then runs the thread
+
+board.PassControl // threaded
+ - set PlayerDoingTurn to false
+
+player.OnControlStart // threaded
+ - player does turn (take as much time as needed)
+ - board.PassControl
 
 
 

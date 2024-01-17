@@ -1,0 +1,8 @@
+Ideas/Data from other sources
+==================================
+
+Alpha-beta pruning algorithm:
+ - https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
+
+Chess Piece images:
+ - https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
