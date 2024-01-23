@@ -72,7 +72,7 @@ public class UndoTurn : Command
             }
         }
 
-        owner.Unselect();
+        owner.OnControlStart();
     }
 }
 
