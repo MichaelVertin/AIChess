@@ -15,7 +15,7 @@ create a queue of commands executed by the user:
 
     when the user passes control or gains control, 
         the queue automatically empties
-        NOTE: need to ensure commands can't be placed on stack 
+        NOTE: need to ensure commands can't be placed on Queue 
               after user passes and regains control
                - do not know if Unity guarantees this
 */
@@ -153,7 +153,7 @@ public class UserPlayer : Player
     private PieceMenu menu = null;
     
     // list of commands from user
-    Stack<Command> commands = new Stack<Command>();
+    Queue<Command> commands = new Queue<Command>();
 
     // the last selected valid startMainCoor
     //   (if none, selectedCoor is null)
@@ -180,7 +180,7 @@ public class UserPlayer : Player
             options.Add(turn);
         }
 
-        commands = new Stack<Command>();
+        commands = new Queue<Command>();
         Unselect();
     }
 
@@ -190,7 +190,7 @@ public class UserPlayer : Player
         // NOTE: when a command executes, 
         //       commands may empty
         Command command;
-        while( commands.TryPop(out command) )
+        while( commands.TryDequeue(out command) )
         {
             command.Execute();
 
@@ -205,7 +205,7 @@ public class UserPlayer : Player
     {
         Unselect();
         turn.Do();
-        commands = new Stack<Command>();
+        commands = new Queue<Command>();
         board.PassControl();
     }
 
@@ -350,13 +350,13 @@ public class UserPlayer : Player
     //  - undoes turns until this player is in control again
     public override void OnUndoButtonSelect()
     {
-        commands.Push(new UndoTurn(this, this.board));
+        commands.Enqueue(new UndoTurn(this, this.board));
     }
 
     public override void OnSelectCoordinate(Coor coor)
     {
         // add a command to select the coordinate
-        commands.Push(new SelectCoordinate(this, coor));
+        commands.Enqueue(new SelectCoordinate(this, coor));
     }
 }
 
