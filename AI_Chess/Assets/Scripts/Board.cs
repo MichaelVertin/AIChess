@@ -164,7 +164,11 @@ public class Board : MonoBehaviour
             playerDoingTurn = true;
             Thread thread = new Thread(playerTurn.OnControlStart);
             thread.Start();
-            //playerTurn.OnControlStart();
+        }
+
+        if( playerInControl != null )
+        {
+            playerInControl.Update();
         }
     }
 
@@ -418,25 +422,7 @@ public class Board : MonoBehaviour
     // after turns are done, signals the start of that player's turn
     public void UndoButton()
     {
-        if(!ReferenceEquals(playerInControl, playerTurn))
-        {
-            Debug.Log("Attempted to Undo when not in control");
-            return;
-        }
-
-        if( history.Count > 0 )
-        {
-            history.Peek().Undo();
-            while ( history.Count > 0 && 
-                    !ReferenceEquals( playerInControl, playerTurn)
-                  )
-            {
-                history.Peek().Undo();
-            }
-        }
-
-        UpdatePhysical();
-        playerInControl.OnControlStart();
+        playerInControl.OnUndoButtonSelect();
     }
 
     // creates a piece menu
