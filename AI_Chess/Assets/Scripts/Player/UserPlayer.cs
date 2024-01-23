@@ -1,7 +1,80 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+
+/* Threading:
+create a queue of commands executed by the user:
+    regularly check for a command is in the queue
+        when the player has control of the board, 
+        and execute it if another command is not running
+
+    when the user 'selects' a command, 
+        the command is stored onto the commandQueue
+
+    when the user passes control or gains control, 
+        the queue automatically empties
+        NOTE: need to ensure commands can't be placed on stack 
+              after user passes and regains control
+               - do not know if Unity guarantees this
+*/
+
+public abstract class Command
+{
+    public abstract void Execute();
+}
+
+public class SelectCoordinate : Command
+{
+    UserPlayer owner;
+    Coor coor;
+
+    public SelectCoordinate(UserPlayer owner, Coor coor)
+    {
+        this.owner = owner;
+        this.coor = coor;
+    }
+
+    public override void Execute()
+    {
+        owner.ExecuteSelectCoordinate(coor);
+    }
+}
+
+public class UndoTurn : Command
+{
+    UserPlayer owner;
+    Board board;
+
+    public UndoTurn(UserPlayer owner, Board board)
+    {
+        this.owner = owner;
+        this.board = board;
+    }
+
+    public override void Execute()
+    {
+        if (!ReferenceEquals(board.playerInControl, this.owner))
+        {
+            Debug.Log("Attempted to Undo when not in control");
+            return;
+        }
+
+        if (board.history.Count > 0)
+        {
+            board.history.Peek().Undo();
+            while (board.history.Count > 0 &&
+                    !ReferenceEquals(board.playerInControl, board.playerTurn)
+                  )
+            {
+                board.history.Peek().Undo();
+            }
+        }
+
+        owner.Unselect();
+    }
+}
 
 
 public struct Coor_Turn_Pair
@@ -78,6 +151,9 @@ public class UserPlayer : Player
     private List<Coor> highlightedCoors = new List<Coor>();
     private UserOptionsMap options;
     private PieceMenu menu = null;
+    
+    // list of commands from user
+    Stack<Command> commands = new Stack<Command>();
 
     // the last selected valid startMainCoor
     //   (if none, selectedCoor is null)
@@ -104,7 +180,23 @@ public class UserPlayer : Player
             options.Add(turn);
         }
 
+        commands = new Stack<Command>();
         Unselect();
+    }
+
+    public override void Update()
+    {
+        // execute all commands
+        // NOTE: when a command executes, 
+        //       commands may empty
+        Command command;
+        while( commands.TryPop(out command) )
+        {
+            command.Execute();
+
+            // update the physical board
+            board.UpdatePhysical();
+        }
     }
 
     // called when turns ended, 
@@ -113,10 +205,11 @@ public class UserPlayer : Player
     {
         Unselect();
         turn.Do();
+        commands = new Stack<Command>();
         board.PassControl();
     }
 
-    public override void OnSelectCoordinate(Coor coor)
+    public void ExecuteSelectCoordinate(Coor coor)
     {
         // first try to select the final coordinate
         if( SelectFinal(coor) )
@@ -135,7 +228,7 @@ public class UserPlayer : Player
     }
 
     // unselect the selected coordinate
-    private void Unselect()
+    public void Unselect()
     {
         selectedCoor = null;
         if( menu != null )
@@ -251,6 +344,19 @@ public class UserPlayer : Player
     {
         Unselect();
         DoTurn(turn);
+    }
+
+    // called when undo button pressed
+    //  - undoes turns until this player is in control again
+    public override void OnUndoButtonSelect()
+    {
+        commands.Push(new UndoTurn(this, this.board));
+    }
+
+    public override void OnSelectCoordinate(Coor coor)
+    {
+        // add a command to select the coordinate
+        commands.Push(new SelectCoordinate(this, coor));
     }
 }
 

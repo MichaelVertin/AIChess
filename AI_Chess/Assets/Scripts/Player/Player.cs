@@ -40,4 +40,17 @@ public abstract class Player
     {
         Debug.Log("Clicked " + coor + " not handled by player");
     }
+
+    // called when Undo Button is selected
+    // default: no response to button
+    //          can be overridden in subclasses (UserPlayer)
+    public virtual void OnUndoButtonSelect()
+    {
+        Debug.Log("WARNING: Player did not respond to Undo Button\n");
+    }
+
+    public virtual void Update()
+    {
+
+    }
 }
