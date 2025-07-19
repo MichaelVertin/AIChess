@@ -71,13 +71,13 @@ public class Board : MonoBehaviour
     public Stack<Turn> history = new Stack<Turn>();
 
     // list of players who can own pieces and control pieces
-    List<Player> players = new List<Player>();
+    List<Player_Chess> players = new List<Player_Chess>();
 
     // player whose pieces can be moved
-    public Player playerTurn;
+    public Player_Chess playerTurn;
 
     // player who can move pieces
-    public Player playerInControl;
+    public Player_Chess playerInControl;
 
     // variable to track when player is doing turn from thread
     public bool playerDoingTurn = false;
@@ -105,7 +105,7 @@ public class Board : MonoBehaviour
     {
         // initialize players
         players.Add(new UserPlayer(0, this));
-        players.Add(new AIPlayer(1, this));
+        players.Add(new UserPlayer(1, this));
 
         // initialize empty position objects
         for( int x = 0; x < GAME_SETTINGS.BOARD_WIDTH; x++ )
@@ -117,8 +117,8 @@ public class Board : MonoBehaviour
             }
         }
 
-        Player player1 = players[0];
-        Player player2 = players[1];
+        Player_Chess player1 = players[0];
+        Player_Chess player2 = players[1];
 
         // initialize pieces
         AddPiece(Create<King>(new Coor(3, 0), player1));
@@ -300,7 +300,7 @@ public class Board : MonoBehaviour
 
 
     // create object at newPieceCoor under owner's control
-    private Piece CreatePiece( Coor newPieceCoor, Player owner, Piece piece )
+    private Piece CreatePiece( Coor newPieceCoor, Player_Chess owner, Piece piece )
     {
         // create an instance of the newPiecePrefab, then initialize
         piece.Init(this, newPieceCoor, players[owner.id]);
@@ -317,7 +317,7 @@ public class Board : MonoBehaviour
     // PieceType is the Piece subclass to be created
     // NOTE: after if is created, must be 'AddPiece'
     //       before it becomes active on the board
-    public Piece Create<PieceType>(Coor newPieceCoor, Player owner)
+    public Piece Create<PieceType>(Coor newPieceCoor, Player_Chess owner)
                      where PieceType : Piece, new()
     {
         Piece piece = new PieceType();

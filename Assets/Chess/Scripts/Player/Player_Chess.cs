@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-public abstract class Player
+public abstract class Player_Chess
 {
     public int id;
     public Coor direction;
@@ -12,7 +12,7 @@ public abstract class Player
     public int baseY;
     protected Board board;
 
-    public Player( int id, Board board )
+    public Player_Chess( int id, Board board )
     {
         this.id = id;
         this.board = board;

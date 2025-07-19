@@ -146,7 +146,7 @@ public class UserOptionsMap
     }
 }
 
-public class UserPlayer : Player
+public class UserPlayer : Player_Chess
 {
     private List<Coor> highlightedCoors = new List<Coor>();
     private UserOptionsMap options;

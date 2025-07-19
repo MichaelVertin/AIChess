@@ -10,11 +10,11 @@ using UnityEngine;
 public abstract class PieceType
 {
     public readonly Coor coor;
-    public readonly Player owner;
+    public readonly Player_Chess owner;
     public readonly Board board;
     protected Piece piece = null;
 
-    public PieceType(Coor coor, Player owner, Board board)
+    public PieceType(Coor coor, Player_Chess owner, Board board)
     {
         this.coor = coor;
         this.owner = owner;
@@ -35,37 +35,37 @@ public abstract class PieceType
 
 public class KingType : PieceType
 {
-    public KingType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    public KingType(Coor coor, Player_Chess owner, Board board) : base(coor, owner, board) { }
     protected override void Create()
     { piece = board.Create<King>(coor, owner); }
 }
 public class PawnType : PieceType
 {
-    public PawnType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    public PawnType(Coor coor, Player_Chess owner, Board board) : base(coor, owner, board) { }
     protected override void Create()
     { piece = board.Create<Pawn>(coor, owner); }
 }
 public class RookType : PieceType
 {
-    public RookType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    public RookType(Coor coor, Player_Chess owner, Board board) : base(coor, owner, board) { }
     protected override void Create()
     { piece = board.Create<Rook>(coor, owner); }
 }
 public class BishopType : PieceType
 {
-    public BishopType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    public BishopType(Coor coor, Player_Chess owner, Board board) : base(coor, owner, board) { }
     protected override void Create()
     { piece = board.Create<Bishop>(coor, owner); }
 }
 public class QueenType : PieceType
 {
-    public QueenType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    public QueenType(Coor coor, Player_Chess owner, Board board) : base(coor, owner, board) { }
     protected override void Create()
     { piece = board.Create<Queen>(coor, owner); }
 }
 public class KnightType : PieceType
 {
-    public KnightType(Coor coor, Player owner, Board board) : base(coor, owner, board) { }
+    public KnightType(Coor coor, Player_Chess owner, Board board) : base(coor, owner, board) { }
     protected override void Create()
     { piece = board.Create<Knight>(coor, owner); }
 }

@@ -14,7 +14,7 @@ public abstract class Piece
     protected Board board;
     public Coor coor; // position of piece on Board
     public bool isActive; // is the piece on the board? 
-    public Player owner; // owner of the piece
+    public Player_Chess owner; // owner of the piece
     private GameObject physicalGO = null; // reference to physical piece 
                                           //     seen by user
     public int turnCount = 0;
@@ -30,7 +30,7 @@ public abstract class Piece
         get;
     }
 
-    public void Init( Board board, Coor coor, Player owner )
+    public void Init( Board board, Coor coor, Player_Chess owner )
     {
         this.board = board;
         this.coor = coor;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RandomPlayer : Player
+public class RandomPlayer : Player_Chess
 {
     public RandomPlayer(int id, Board board) : base(id, board)
     {

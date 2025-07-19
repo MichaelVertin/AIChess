@@ -23,7 +23,7 @@ class Pair<T1,T2>
 
 
 
-public class AIPlayer : Player
+public class AIPlayer : Player_Chess
 {
     public AIPlayer(int id, Board board) : base(id, board)
     {
