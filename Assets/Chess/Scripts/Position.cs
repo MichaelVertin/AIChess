@@ -53,7 +53,7 @@ public class Position : MonoBehaviour
         Recolor();
     }
 
-    public void OnMouseDown()
+    public void OnPositionClicked()
     {
         board.OnSelectCoordinate(coor);
     }

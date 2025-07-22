@@ -193,9 +193,21 @@ public class UserPlayer : Player_Chess
         while( commands.TryDequeue(out command) )
         {
             command.Execute();
+        }
 
-            // update the physical board
-            board.UpdatePhysical();
+        // Check if a position has been clicked when active
+        if(board.playerInControl == this)
+        {
+            if(InputManager2D.WasLeftMouseButtonReleased)
+            {
+                if (InputManager2D.GetObjectUnderMouse<Position>(out Position position))
+                {
+                    position.OnPositionClicked();
+                }
+
+                // update the physical board
+                board.UpdatePhysical();
+            }
         }
     }
 
